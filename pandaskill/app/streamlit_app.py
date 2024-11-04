@@ -10,4 +10,6 @@ df = df.loc[:,['game_id', 'player_id', 'date', 'match_id', 'tournament_id',
        'tournament_name', 'serie_id', 'serie_name', 'league_id', 'league_name', 'region',
        'team_id', 'team_name', 'team_acronym', 'player_name', 'role', 'win']]
 
+st.write("Updated")
+
 st.dataframe(df)

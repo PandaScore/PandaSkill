@@ -13,7 +13,6 @@ nvidia-nccl-cu12==2.23.4
 openskill==6.0.1
 packaging==24.1
 pandas==2.2.3
--e git+https://github.com/PandaScore/PandaSkill.git@a07fc894da72e7264f5caa1682753a18e106be60#egg=pandaskill
 pillow==11.0.0
 pluggy==1.5.0
 progressbar==2.5

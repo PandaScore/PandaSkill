@@ -21,7 +21,7 @@ performance_scores = pd.read_csv(
 )
 
 skill_ratings = pd.read_csv(
-    join(performance_scores_experiment_folder, "player_rating", skill_rating_experiment, "player_ratings.csv") 
+    join(performance_scores_experiment_folder, "skill_rating", skill_rating_experiment, "skill_ratings.csv") 
 )
 
 df = pd.merge(
@@ -34,8 +34,8 @@ df = df.set_index(["game_id", "player_id"])
 
 df_game = df.loc[game_id]
 
-df_game["rating"] = df_game.player_rating_after.apply(lambda r: eval(r)["lower_bound"])
-df_game["update"] = df_game["rating"] - df_game.player_rating_before.apply(lambda r: eval(r)["lower_bound"])
+df_game["rating"] = df_game.skill_rating_after.apply(lambda r: eval(r)["lower_bound"])
+df_game["update"] = df_game["rating"] - df_game.skill_rating_before.apply(lambda r: eval(r)["lower_bound"])
 df_game = df_game.loc[:, ["player_name", "team_name", "role", "performance_score", "rating", "update"]]
 df_game = df_game.sort_values("performance_score", ascending=False)
 

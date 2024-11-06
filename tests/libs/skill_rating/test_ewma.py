@@ -20,8 +20,8 @@ def test_compute_ewma_ratings():
     ratings_df = compute_ewma_ratings(df, alpha)
     
     expected_data = {
-        'player_rating_before': [0.0, 10.0, 15.0, 0.0, 40.0, 45.0],
-        'player_rating_after': [10.0, 15.0, 22.5, 40.0, 45.0, 52.5]
+        'skill_rating_before': [0.0, 10.0, 15.0, 0.0, 40.0, 45.0],
+        'skill_rating_after': [10.0, 15.0, 22.5, 40.0, 45.0, 52.5]
     }
     expected_df = pd.DataFrame(expected_data, index=df.index)
     
@@ -37,16 +37,16 @@ def test__compute_ewma_ratings_for_player():
     player_game_performance_score = player_game_performance_score.set_index('date')
     
     alpha = 0.5
-    player_ratings = _compute_ewma_ratings_for_player(player_game_performance_score, alpha)
+    skill_ratings = _compute_ewma_ratings_for_player(player_game_performance_score, alpha)
     
     expected_data = {
-        'player_rating_before': [0.0, 10.0, 15.0],
-        'player_rating_after': [10.0, 15.0, 22.5]
+        'skill_rating_before': [0.0, 10.0, 15.0],
+        'skill_rating_after': [10.0, 15.0, 22.5]
     }
     expected_index = player_game_performance_score.index
     expected_df = pd.DataFrame(expected_data, index=expected_index)
     
-    pd.testing.assert_frame_equal(player_ratings, expected_df)
+    pd.testing.assert_frame_equal(skill_ratings, expected_df)
 
 if __name__ == '__main__':
     pytest.main([__file__])

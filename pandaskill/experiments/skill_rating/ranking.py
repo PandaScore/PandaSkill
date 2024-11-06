@@ -51,18 +51,18 @@ def create_global_player_ranking(
         ranking = _update_meta_ratings_with_latest_known_values(ranking)
 
     ranking = ranking[ranking["nb_games"] >= parameters["min_nb_games"]]
-    ranking = ranking.sort_values("player_rating_after", ascending=False)
+    ranking = ranking.sort_values("skill_rating_after", ascending=False)
     ranking = ranking.reset_index()  
 
     columns_renaming_dict = {
-        "player_rating_after": "player_rating",
+        "skill_rating_after": "skill_rating",
         "date": "last_game_date"
     }
-    if "player_rating_after_mu" in ranking.columns:
+    if "skill_rating_after_mu" in ranking.columns:
         columns_renaming_dict = {
             **columns_renaming_dict,
-            "player_rating_after_mu": "player_rating_mu",
-            "player_rating_after_sigma": "player_rating_sigma",
+            "skill_rating_after_mu": "skill_rating_mu",
+            "skill_rating_after_sigma": "skill_rating_sigma",
         }
 
 
@@ -71,9 +71,9 @@ def create_global_player_ranking(
 
     columns = [
         "rank", "player_id", "player_name", "team_name", "region", "league_name", "role", "nb_games", 
-        "last_game_date", "player_rating"]
-    if "player_rating_mu" in ranking.columns:
-        columns += ["player_rating_mu", "player_rating_sigma"]
+        "last_game_date", "skill_rating"]
+    if "skill_rating_mu" in ranking.columns:
+        columns += ["skill_rating_mu", "skill_rating_sigma"]
 
     ranking = ranking.loc[:, columns]
 
@@ -93,16 +93,16 @@ def _update_meta_ratings_with_latest_known_values(ranking: pd.DataFrame) -> pd.D
     ranking.loc[:, "meta_rating_after"] = ranking.apply(
         lambda row: lower_bound_rating(row["meta_rating_after_mu"], row["meta_rating_after_sigma"]), axis=1
     )
-    ranking.loc[:, "player_rating_after_mu"] = (
+    ranking.loc[:, "skill_rating_after_mu"] = (
         ranking.loc[:, "meta_rating_after_mu"] 
         + ranking.loc[:, "contextual_rating_after_mu"]
     )
-    ranking.loc[:, "player_rating_after_sigma"] = np.sqrt(
+    ranking.loc[:, "skill_rating_after_sigma"] = np.sqrt(
         (ranking.loc[:, "contextual_rating_after_sigma"] ** 2)
         + (ranking.loc[:, "meta_rating_after_sigma"] ** 2)
     )
-    ranking.loc[:, "player_rating_after"] = ranking.apply(
-        lambda row: lower_bound_rating(row["player_rating_after_mu"], row["player_rating_after_sigma"]), axis=1
+    ranking.loc[:, "skill_rating_after"] = ranking.apply(
+        lambda row: lower_bound_rating(row["skill_rating_after_mu"], row["skill_rating_after_sigma"]), axis=1
     )
     return ranking
     
@@ -135,10 +135,10 @@ def _save_region_average_ranking(
     ranking: pd.DataFrame, 
     saving_dir: str
 ) -> None:
-    region_average_ranking = ranking.groupby("region")["player_rating"].mean().reset_index()
-    region_average_ranking = region_average_ranking.sort_values("player_rating", ascending=False)
+    region_average_ranking = ranking.groupby("region")["skill_rating"].mean().reset_index()
+    region_average_ranking = region_average_ranking.sort_values("skill_rating", ascending=False)
     region_average_ranking["rank"] = region_average_ranking.index + 1
-    region_average_ranking = region_average_ranking.loc[:, ["rank", "region", "player_rating"]]
+    region_average_ranking = region_average_ranking.loc[:, ["rank", "region", "skill_rating"]]
     region_average_ranking.to_csv(join(saving_dir, "region_average_ranking.csv"), index=False)
 
 def _save_region_top_ranking(
@@ -147,10 +147,10 @@ def _save_region_top_ranking(
     saving_dir: str
 ) -> None:
     region_top10_ranking = ranking.groupby("region").head(top).reset_index()
-    region_top10_ranking = region_top10_ranking.groupby("region")["player_rating"].mean().reset_index()
-    region_top10_ranking = region_top10_ranking.sort_values("player_rating", ascending=False)
+    region_top10_ranking = region_top10_ranking.groupby("region")["skill_rating"].mean().reset_index()
+    region_top10_ranking = region_top10_ranking.sort_values("skill_rating", ascending=False)
     region_top10_ranking["rank"] = region_top10_ranking.index + 1
-    region_top10_ranking = region_top10_ranking.loc[:, ["rank", "region", "player_rating"]]
+    region_top10_ranking = region_top10_ranking.loc[:, ["rank", "region", "skill_rating"]]
     region_top10_ranking.to_csv(join(saving_dir, "region_top10_ranking.csv"), index=False)
 
 def _save_team_ranking(
@@ -162,19 +162,19 @@ def _save_team_ranking(
             "region": "first",
             "nb_games": "mean",
             "last_game_date": "first",
-            "player_rating": "mean",
+            "skill_rating": "mean",
         }
     ).reset_index()
-    team_ranking = team_ranking.sort_values("player_rating", ascending=False)
+    team_ranking = team_ranking.sort_values("skill_rating", ascending=False)
     team_ranking["rank"] = team_ranking.index + 1
-    team_ranking = team_ranking.loc[:, ["rank", "team_name", "region", "nb_games", "last_game_date", "player_rating"]]
+    team_ranking = team_ranking.loc[:, ["rank", "team_name", "region", "nb_games", "last_game_date", "skill_rating"]]
     team_ranking.to_csv(join(saving_dir, "team_ranking.csv"), index=False)
 
 def evaluate_ranking(ranking: pd.DataFrame, experiment_dir: str) -> None:
     data_dir = join(ARTIFACTS_DIR, "data", "expert_surveys")
     experiment_dir = join(experiment_dir, "rankings")
     
-    player_id_to_rating_mapping = ranking[["player_id", "player_rating"]].set_index("player_id").to_dict()["player_rating"]
+    player_id_to_rating_mapping = ranking[["player_id", "skill_rating"]].set_index("player_id").to_dict()["skill_rating"]
 
     metrics = {}
     for ranking_kind in ["global", "europe", "north_america", "china", "korea"]:
@@ -208,7 +208,7 @@ def evaluate_ranking(ranking: pd.DataFrame, experiment_dir: str) -> None:
             "nb_traders": int(nb_experts),
         }
 
-        if "player_rating_mu" in ranking.columns:
+        if "skill_rating_mu" in ranking.columns:
             openskill_metrics = _openskill_ranking_evaluation(ranking, player_comparison_df, expert_names, ranking_kind, experiment_dir)
             metrics[ranking_kind]["openskill_metrics"] = openskill_metrics
 
@@ -261,8 +261,8 @@ def _compute_concordance_metrics(player_comparison_df: pd.DataFrame, expert_name
 
 def _openskill_ranking_evaluation(ranking: pd.DataFrame, player_comparison_df: pd.DataFrame, expert_names: list, ranking_kind: str, experiment_dir: str) -> None:
     player_comparison_df = player_comparison_df.copy()
-    player_id_to_rating_mapping = ranking[["player_id", "player_rating_mu"]].set_index("player_id").to_dict()["player_rating_mu"]
-    player_id_to_rating_sigma_mapping = ranking[["player_id", "player_rating_sigma"]].set_index("player_id").to_dict()["player_rating_sigma"]
+    player_id_to_rating_mapping = ranking[["player_id", "skill_rating_mu"]].set_index("player_id").to_dict()["skill_rating_mu"]
+    player_id_to_rating_sigma_mapping = ranking[["player_id", "skill_rating_sigma"]].set_index("player_id").to_dict()["skill_rating_sigma"]
 
     player_comparison_df["player_0_rating_mu"] = player_comparison_df.player_id_0.apply(lambda x: player_id_to_rating_mapping[x])
     player_comparison_df["player_1_rating_mu"] = player_comparison_df.player_id_1.apply(lambda x: player_id_to_rating_mapping[x])
@@ -285,7 +285,7 @@ def _openskill_ranking_evaluation(ranking: pd.DataFrame, player_comparison_df: p
         y_true_list, 
         y_prob_list, 
         nbins, 
-        f"Calibration plot for predicting which player is better from player rating - {ranking_kind}", 
+        f"Calibration plot for predicting which player is better from skill rating - {ranking_kind}", 
         experiment_dir, 
         f"better_player_prediction_calibration_from_rating_{ranking_kind}.png"
     )
@@ -299,7 +299,7 @@ def _openskill_ranking_evaluation(ranking: pd.DataFrame, player_comparison_df: p
         y_true_list, 
         y_prob_list, 
         nbins, 
-        f"Calibration plot for predicting which player is better from player rating - {ranking_kind} - Experts unanimous", 
+        f"Calibration plot for predicting which player is better from skill rating - {ranking_kind} - Experts unanimous", 
         experiment_dir, 
         f"better_player_prediction_calibration_from_rating_experts_unanimous_{ranking_kind}.png"
     )

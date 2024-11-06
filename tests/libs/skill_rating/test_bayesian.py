@@ -11,7 +11,7 @@ from pandaskill.libs.skill_rating.bayesian import (
     _compute_ratings_after_contextual_game,
     _compute_ratings_after_meta_game,
     _apply_rating_updates,
-    _compute_overall_player_ratings,
+    _compute_overall_skill_ratings,
     _instantiate_rater_model,
     lower_bound_rating,
     PlackettLuce,
@@ -36,13 +36,13 @@ def test_initialize_ratings():
         ], columns=["game_id", "player_id", "region"]
     )
     df = df.set_index(["game_id", "player_id"])
-    player_ratings, region_ratings = _initialize_ratings(df)
+    skill_ratings, region_ratings = _initialize_ratings(df)
 
     for player_id in player_ids:
-        assert player_id in player_ratings
-        assert player_ratings[player_id]['mu'] == DEFAULT_MU
-        assert player_ratings[player_id]['sigma'] == DEFAULT_SIGMA
-        assert player_ratings[player_id]['lower_bound'] == lower_bound_rating(DEFAULT_MU, DEFAULT_SIGMA)
+        assert player_id in skill_ratings
+        assert skill_ratings[player_id]['mu'] == DEFAULT_MU
+        assert skill_ratings[player_id]['sigma'] == DEFAULT_SIGMA
+        assert skill_ratings[player_id]['lower_bound'] == lower_bound_rating(DEFAULT_MU, DEFAULT_SIGMA)
 
     for region in regions:
         assert region in region_ratings
@@ -103,10 +103,10 @@ def test_compute_ratings_before_game():
     assert ratings_before[0].mu == expected_mu_0
     assert ratings_before[0].sigma == player_contextual_ratings[0]['sigma']
 
-def test_compute_overall_player_ratings():
+def test_compute_overall_skill_ratings():
     contextual_rating = {'mu': 27.0, 'sigma': 8.0}
     meta_rating = {'mu': 26.0, 'sigma': 6.0}
-    overall_rating = _compute_overall_player_ratings(contextual_rating, meta_rating)
+    overall_rating = _compute_overall_skill_ratings(contextual_rating, meta_rating)
     expected_mu = contextual_rating['mu'] + meta_rating['mu']
     expected_sigma = np.sqrt(contextual_rating['sigma']**2 + meta_rating['sigma']**2)
     expected_lower_bound = lower_bound_rating(expected_mu, expected_sigma)
@@ -290,7 +290,7 @@ def test_compute_bayesian_ratings(mocker):
     use_ffa_setting = True
     use_meta_ratings = True
     rater_model = "openskill"
-    player_rating_updates_df = compute_bayesian_ratings(
+    skill_rating_updates_df = compute_bayesian_ratings(
         df, use_ffa_setting, use_meta_ratings, rater_model
     )
 
@@ -341,10 +341,10 @@ def test_compute_bayesian_ratings(mocker):
                 p1_meta_rating_before_game, 
                 p1_contextual_rating_after_game, 
                 p1_meta_rating_after_game, 
-                _compute_overall_player_ratings(
+                _compute_overall_skill_ratings(
                     p1_contextual_rating_before_game, p1_meta_rating_before_game
                 ), 
-                _compute_overall_player_ratings(
+                _compute_overall_skill_ratings(
                     p1_contextual_rating_after_game, p1_meta_rating_after_game
                 )
             ], 
@@ -354,10 +354,10 @@ def test_compute_bayesian_ratings(mocker):
                 p2_meta_rating_before_game, 
                 p2_contextual_rating_after_game, 
                 p2_meta_rating_after_game, 
-                _compute_overall_player_ratings(
+                _compute_overall_skill_ratings(
                     p2_contextual_rating_before_game, p2_meta_rating_before_game
                 ), 
-                _compute_overall_player_ratings(
+                _compute_overall_skill_ratings(
                     p2_contextual_rating_after_game, p2_meta_rating_after_game
                 )
             ]
@@ -369,11 +369,11 @@ def test_compute_bayesian_ratings(mocker):
             "region", 
             "contextual_rating_before", "meta_rating_before", 
             "contextual_rating_after", "meta_rating_after",
-            "player_rating_before", "player_rating_after"
+            "skill_rating_before", "skill_rating_after"
         ]
     )
 
-    assert player_rating_updates_df.equals(expected_df)
+    assert skill_rating_updates_df.equals(expected_df)
 
 if __name__ == '__main__':
     pytest.main([__file__])

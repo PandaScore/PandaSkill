@@ -40,7 +40,7 @@ for (perf_model, rating_model) in models.keys():
         "artifacts",
         "experiments",
         perf_model,
-        "player_rating",
+        "skill_rating",
         rating_model,
         "rankings",
         "ranking_experts_evaluation.yaml",

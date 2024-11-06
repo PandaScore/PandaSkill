@@ -1,7 +1,7 @@
 
 from pandaskill.experiments.general.metrics import *
 from pandaskill.experiments.general.utils import *
-from pandaskill.experiments.skill_rating.evaluation import evaluate_player_ratings
+from pandaskill.experiments.skill_rating.evaluation import evaluate_skill_ratings
 from pandaskill.experiments.skill_rating.ranking import create_rankings, evaluate_ranking
 from pandaskill.experiments.skill_rating.visualization import visualize_ratings
 from pandaskill.libs.skill_rating.ewma import compute_ewma_ratings
@@ -30,34 +30,34 @@ def load_data(performance_score_experiment: str) -> pd.DataFrame:
     
     return data
 
-def compute_player_ratings(data: pd.DataFrame, func: callable, parameters: dict) -> pd.DataFrame:
+def compute_skill_ratings(data: pd.DataFrame, func: callable, parameters: dict) -> pd.DataFrame:
     data_with_ratings = func(data, **parameters)
     return data_with_ratings
 
-def save_ratings(player_ratings: pd.DataFrame, player_rating_experiment_dir: str) -> None:
-    player_ratings.to_csv(join(player_rating_experiment_dir, f"player_ratings.csv"))
+def save_ratings(skill_ratings: pd.DataFrame, skill_rating_experiment_dir: str) -> None:
+    skill_ratings.to_csv(join(skill_rating_experiment_dir, f"skill_ratings.csv"))
 
 def prepare_ratings_data_for_evaluation(
-    data: pd.DataFrame, player_ratings:pd.DataFrame, method_name: str
+    data: pd.DataFrame, skill_ratings:pd.DataFrame, method_name: str
 ) -> pd.DataFrame:
     if method_name in ["bayesian"]:
-        player_ratings.drop(columns=["region"], inplace=True)
-        player_ratings["contextual_rating_before"] = player_ratings["contextual_rating_before"].apply(lambda x: x["lower_bound"])
-        player_ratings["contextual_rating_after_mu"] = player_ratings["contextual_rating_after"].apply(lambda x: x["mu"])
-        player_ratings["contextual_rating_after_sigma"] = player_ratings["contextual_rating_after"].apply(lambda x: x["sigma"])
-        player_ratings["contextual_rating_after"] = player_ratings["contextual_rating_after"].apply(lambda x: x["lower_bound"])
+        skill_ratings.drop(columns=["region"], inplace=True)
+        skill_ratings["contextual_rating_before"] = skill_ratings["contextual_rating_before"].apply(lambda x: x["lower_bound"])
+        skill_ratings["contextual_rating_after_mu"] = skill_ratings["contextual_rating_after"].apply(lambda x: x["mu"])
+        skill_ratings["contextual_rating_after_sigma"] = skill_ratings["contextual_rating_after"].apply(lambda x: x["sigma"])
+        skill_ratings["contextual_rating_after"] = skill_ratings["contextual_rating_after"].apply(lambda x: x["lower_bound"])
         
-        player_ratings["meta_rating_before"] = player_ratings["meta_rating_before"].apply(lambda x: x["lower_bound"])
-        player_ratings["meta_rating_after_mu"] = player_ratings["meta_rating_after"].apply(lambda x: x["mu"])
-        player_ratings["meta_rating_after_sigma"] = player_ratings["meta_rating_after"].apply(lambda x: x["sigma"])
-        player_ratings["meta_rating_after"] = player_ratings["meta_rating_after"].apply(lambda x: x["lower_bound"])
+        skill_ratings["meta_rating_before"] = skill_ratings["meta_rating_before"].apply(lambda x: x["lower_bound"])
+        skill_ratings["meta_rating_after_mu"] = skill_ratings["meta_rating_after"].apply(lambda x: x["mu"])
+        skill_ratings["meta_rating_after_sigma"] = skill_ratings["meta_rating_after"].apply(lambda x: x["sigma"])
+        skill_ratings["meta_rating_after"] = skill_ratings["meta_rating_after"].apply(lambda x: x["lower_bound"])
 
-        player_ratings["player_rating_before"] = player_ratings["player_rating_before"].apply(lambda x: x["lower_bound"])        
-        player_ratings["player_rating_after_mu"] = player_ratings["player_rating_after"].apply(lambda x: x["mu"])
-        player_ratings["player_rating_after_sigma"] = player_ratings["player_rating_after"].apply(lambda x: x["sigma"])
-        player_ratings["player_rating_after"] = player_ratings["player_rating_after"].apply(lambda x: x["lower_bound"])
+        skill_ratings["skill_rating_before"] = skill_ratings["skill_rating_before"].apply(lambda x: x["lower_bound"])        
+        skill_ratings["skill_rating_after_mu"] = skill_ratings["skill_rating_after"].apply(lambda x: x["mu"])
+        skill_ratings["skill_rating_after_sigma"] = skill_ratings["skill_rating_after"].apply(lambda x: x["sigma"])
+        skill_ratings["skill_rating_after"] = skill_ratings["skill_rating_after"].apply(lambda x: x["lower_bound"])
 
-    data_with_ratings = data.join(player_ratings)
+    data_with_ratings = data.join(skill_ratings)
 
     return data_with_ratings
 
@@ -119,7 +119,7 @@ ewma_config = {
 
 if __name__ == "__main__":    
     config = {
-        "experiment": "meta_ffa_openskill2",
+        "experiment": "meta_ffa_openskill_rename",
         "performance_score_experiment": "playerank_test",
         "method": meta_ffa_openskill_config,
         "evaluation": {
@@ -136,11 +136,11 @@ if __name__ == "__main__":
             "since": "2024-03-15"
         }
     }
-    logging.info(f"Starting player rating experiment `{config['experiment']}`")
+    logging.info(f"Starting skill rating experiment `{config['experiment']}`")
     
     experiment_dir = join(
         ARTIFACTS_DIR, "experiments", config["performance_score_experiment"], 
-        "player_rating", config["experiment"]
+        "skill_rating", config["experiment"]
     )
     os.makedirs(experiment_dir, exist_ok=True)    
     save_yaml(config, experiment_dir, "config.yaml")
@@ -148,18 +148,18 @@ if __name__ == "__main__":
     logging.info(f"Loading data from `{experiment_dir}`")
     data = load_data(config["performance_score_experiment"])
 
-    logging.info(f"Computing player ratings using method `{config["method"]["name"]}`")
+    logging.info(f"Computing skill ratings using method `{config["method"]["name"]}`")
     method = get_method_from_method_name(config["method"]["name"])
-    player_ratings = compute_player_ratings(data, method, config["method"]["parameters"])
-    save_ratings(player_ratings, experiment_dir)
+    skill_ratings = compute_skill_ratings(data, method, config["method"]["parameters"])
+    save_ratings(skill_ratings, experiment_dir)
 
-    logging.info(f"Evaluating player ratings")
-    data_with_ratings = prepare_ratings_data_for_evaluation(data, player_ratings, config["method"]["name"])
-    evaluate_player_ratings(data_with_ratings, experiment_dir, config["evaluation"])
+    logging.info(f"Evaluating skill ratings")
+    data_with_ratings = prepare_ratings_data_for_evaluation(data, skill_ratings, config["method"]["name"])
+    evaluate_skill_ratings(data_with_ratings, experiment_dir, config["evaluation"])
     visualize_ratings(data_with_ratings, experiment_dir, config["visualization"])
     
     logging.info(f"Creating and evaluating player rankings")
     ranking = create_rankings(data_with_ratings, experiment_dir, config["ranking"])
     evaluate_ranking(ranking, experiment_dir)
 
-    logging.info(f"Player rating experiment `{config['experiment']}` finished")
+    logging.info(f"skill rating experiment `{config['experiment']}` finished")

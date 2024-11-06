@@ -12,7 +12,7 @@ from scipy import stats
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 
-def evaluate_player_ratings(
+def evaluate_skill_ratings(
     data_with_ratings: pd.DataFrame, 
     experiment_dir: str, 
     evaluation_config: dict
@@ -72,12 +72,12 @@ def evaluate_player_ratings(
         y_test_list, 
         y_prob_list, 
         25, 
-        f"Calibration plot for game outcome forecasting from player rating", 
+        f"Calibration plot for game outcome forecasting from skill rating", 
         experiment_dir, 
-        f"player_rating_outcome_forecasting_calibration"
+        f"skill_rating_outcome_forecasting_calibration"
     )
 
-    save_yaml(metrics, experiment_dir, "player_ratings_metrics.yaml")
+    save_yaml(metrics, experiment_dir, "skill_ratings_metrics.yaml")
 
 def _rolling_forecast_game_outcome(
     data_with_ratings: pd.DataFrame, evaluation_config: dict
@@ -140,7 +140,7 @@ def _format_data_for_rolling_game_forecast(
         game = game.sort_values(["win", "role_order"])
         return pd.DataFrame(data=[[
             game.date.values[0],
-            *game.player_rating_before.values,
+            *game.skill_rating_before.values,
         ]], columns=["date", *role_per_team_columns])
 
     end_warmup_date = evaluation_config["end_warmup_date"]
@@ -190,9 +190,9 @@ def _compute_intra_inter_region_metrics(
         y_test_list_region_agg, 
         y_prob_list_region_agg, 
         25, 
-        f"Calibration plot for {kind}-region game outcome forecasting from player rating", 
+        f"Calibration plot for {kind}-region game outcome forecasting from skill rating", 
         experiment_dir, 
-        f"player_rating_{kind}_region_outcome_forecasting_calibration"
+        f"skill_rating_{kind}_region_outcome_forecasting_calibration"
     )
 
     return region_aggmetrics
@@ -217,9 +217,9 @@ def _compute_region_change_metrics(
         y_test_list_region_change, 
         y_prob_list_region_change, 
         25, 
-        f"Calibration plot for game outcome forecasting from player rating - game with region change", 
+        f"Calibration plot for game outcome forecasting from skill rating - game with region change", 
         experiment_dir, 
-        f"player_rating_region_change_outcome_forecasting_calibration"
+        f"skill_rating_region_change_outcome_forecasting_calibration"
     )
 
     return region_change_metrics
@@ -242,8 +242,8 @@ def _compute_role_ratings_distribution_metrics(data_with_ratings: pd.DataFrame) 
     wasserstein_disance_list = []
     for role_1, role_2 in role_pairs:
         wasserstein_disance = stats.wasserstein_distance(
-            data_with_ratings[data_with_ratings.role == role_1].player_rating_after,
-            data_with_ratings[data_with_ratings.role == role_2].player_rating_after
+            data_with_ratings[data_with_ratings.role == role_1].skill_rating_after,
+            data_with_ratings[data_with_ratings.role == role_2].skill_rating_after
         )
         wasserstein_disance_list.append(wasserstein_disance)
         

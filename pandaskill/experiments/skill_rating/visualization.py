@@ -34,38 +34,38 @@ def visualize_ratings(
 def _visualize_ratings_distributions(
     ratings_df: pd.DataFrame, saving_dir: str, min_nb_games: int, since: str
 ) -> None:
-    last_player_ratings_df = ratings_df.groupby("player_id").last()
-    last_player_ratings_df["nb_games"] = ratings_df.groupby("player_id").count()["date"]
-    last_player_ratings_df = last_player_ratings_df[last_player_ratings_df["date"] >= since]
+    last_skill_ratings_df = ratings_df.groupby("player_id").last()
+    last_skill_ratings_df["nb_games"] = ratings_df.groupby("player_id").count()["date"]
+    last_skill_ratings_df = last_skill_ratings_df[last_skill_ratings_df["date"] >= since]
 
-    last_player_ratings_df = last_player_ratings_df[last_player_ratings_df["nb_games"] >= min_nb_games]
+    last_skill_ratings_df = last_skill_ratings_df[last_skill_ratings_df["nb_games"] >= min_nb_games]
 
 
     plot_violin_distributions(
-        last_player_ratings_df,
+        last_skill_ratings_df,
         "role",
-        "player_rating_after",
-        f"Player rating distribution by role",
+        "skill_rating_after",
+        f"skill rating distribution by role",
         "Role",
         "Player Skill Rating",
         saving_dir,
-        "player_rating_distribution_by_role.png"
+        "skill_rating_distribution_by_role.png"
     )
 
     plot_violin_distributions(
-        last_player_ratings_df,
+        last_skill_ratings_df,
         "region",
-        "player_rating_after",
-        f"Player rating distribution by region",
+        "skill_rating_after",
+        f"skill rating distribution by region",
         "Region",
         "Player Skill Rating",
         saving_dir,
-        "player_rating_distribution_by_region.png"
+        "skill_rating_distribution_by_region.png"
     )
 
-    if "contextual_rating_after" in last_player_ratings_df.columns:
+    if "contextual_rating_after" in last_skill_ratings_df.columns:
         plot_violin_distributions(
-            last_player_ratings_df,
+            last_skill_ratings_df,
             "role",
             "contextual_rating_after",
             f"Player contextual rating distribution by role",
@@ -75,7 +75,7 @@ def _visualize_ratings_distributions(
             "contextual_rating_distribution_by_role.png"
         )
         plot_violin_distributions(
-            last_player_ratings_df,
+            last_skill_ratings_df,
             "region",
             "contextual_rating_after",
             f"Player contextual rating distribution by region",
@@ -95,7 +95,7 @@ def _visualize_ratings_evolutions(
 ) -> None:
     if since is not None:
         ratings_df = ratings_df[ratings_df["date"] >= since]
-        
+
     if kind == "meta":
         _visualize_meta_rating_evolution(
             ratings_df,
@@ -106,22 +106,22 @@ def _visualize_ratings_evolutions(
             raise ValueError("`player` or `team` rating evolution requires a `subset`")
         
         if kind == "player":
-            title = f"Player rating evolution for {', '.join(subset)}"
+            title = f"skill rating evolution for {', '.join(subset)}"
             hue = "player_name"
             ratings_df = ratings_df.reset_index().loc[
-                :, ["game_id", "date", hue, "player_rating_after"]
+                :, ["game_id", "date", hue, "skill_rating_after"]
             ]
         elif kind == "team":
             title = f"Team rating (average of its players) evolution for {', '.join(subset)} "
             ratings_df = ratings_df.reset_index().groupby(["game_id", "team_name"]).agg(
                 {
-                    "player_rating_after": "mean",
+                    "skill_rating_after": "mean",
                     "date": "first"
                 }
             ).reset_index()
             hue = "team_name"
         
-        y = "player_rating_after"
+        y = "skill_rating_after"
         ratings_df = ratings_df[ratings_df[hue].isin(subset)]
 
         _create_and_save_line_plot(
@@ -145,20 +145,20 @@ def _visualizes_series_ratings_evolutions(ratings_df, serie_name, saving_dir):
         role_ratings_df = ratings_df[ratings_df["role"] == role]
         _create_and_save_line_plot(
             role_ratings_df,
-            "player_rating_after",
+            "skill_rating_after",
             "player_name",
-            f"Player rating evolution for {serie_name} and role {role}",
+            f"skill rating evolution for {serie_name} and role {role}",
             saving_dir,
-            f"{serie_name_lower}_player_rating_evolution_for_role_{role}.png"
+            f"{serie_name_lower}_skill_rating_evolution_for_role_{role}.png"
         )
 
     team_ratings_df = ratings_df.reset_index().groupby(["game_id", "team_name"]).agg({
-        "player_rating_after": "mean",
+        "skill_rating_after": "mean",
         "date": "first",
     }).reset_index()
     _create_and_save_line_plot(
         team_ratings_df,
-        "player_rating_after",
+        "skill_rating_after",
         "team_name",
         f"Team rating evolution for {serie_name}",
         saving_dir,
@@ -201,34 +201,34 @@ def _visualize_meta_rating_evolution(
     ratings_df: pd.DataFrame,
     experiment_dir: str,
 ) -> None:
-    region_player_ratings_after_serie_df, nb_interregion_games_per_serie = construct_player_ratings_for_region_after_serie(
+    region_skill_ratings_after_serie_df, nb_interregion_games_per_serie = construct_skill_ratings_for_region_after_serie(
         ratings_df
     )
-    if region_player_ratings_after_serie_df.empty:
+    if region_skill_ratings_after_serie_df.empty:
         return 
 
     _create_and_save_meta_rating_evolution(
-        region_player_ratings_after_serie_df, 
+        region_skill_ratings_after_serie_df, 
         nb_interregion_games_per_serie,
-        "Average per region player rating Evolution after inter-region games",
-        "player_rating_evolution_per_serie_and_region_mean.png", 
+        "Average per region skill rating Evolution after inter-region games",
+        "skill_rating_evolution_per_serie_and_region_mean.png", 
         experiment_dir
     )
 
-    sorted_df = region_player_ratings_after_serie_df.sort_values(
-        by=['serie_name', 'region', 'player_rating_after'], 
+    sorted_df = region_skill_ratings_after_serie_df.sort_values(
+        by=['serie_name', 'region', 'skill_rating_after'], 
         ascending=[True, True, False]
     )
     top_10_players = sorted_df.groupby(['serie_name', 'region'], observed=False).head(10).reset_index()
     _create_and_save_meta_rating_evolution(
         top_10_players,
         nb_interregion_games_per_serie,
-        "Top 10 per region player rating evolution after inter-region games",
-        "player_rating_evolution_per_serie_and_region_best.png",
+        "Top 10 per region skill rating evolution after inter-region games",
+        "skill_rating_evolution_per_serie_and_region_best.png",
         experiment_dir
     )
 
-def construct_player_ratings_for_region_after_serie(
+def construct_skill_ratings_for_region_after_serie(
     ratings_df: pd.DataFrame
 ) -> tuple[pd.DataFrame, pd.Series]:    
     interregion_ratings = ratings_df[
@@ -245,10 +245,10 @@ def construct_player_ratings_for_region_after_serie(
         serie_data = interregion_ratings[interregion_ratings.serie_name == serie_name]
         date = serie_data.iloc[-1]["date"]
         for region in serie_data.region.unique():
-            ratings_in_region_after_serie = _get_player_ratings_of_region_at_a_given_point_in_time(
+            ratings_in_region_after_serie = _get_skill_ratings_of_region_at_a_given_point_in_time(
                 ratings_df, region, date
             )
-            ratings_after_serie = ratings_in_region_after_serie.loc[:, ["player_rating_after"]]
+            ratings_after_serie = ratings_in_region_after_serie.loc[:, ["skill_rating_after"]]
             ratings_after_serie["region"] = region
             ratings_after_serie["serie_name"] = serie_name            
             data.append(ratings_after_serie)
@@ -256,16 +256,16 @@ def construct_player_ratings_for_region_after_serie(
         nb_interregion_games_for_serie = len(serie_data.index.get_level_values(0).unique())
         nb_interregion_games.append(nb_interregion_games_for_serie)
 
-    region_player_ratings_after_serie_df = pd.concat(data)
+    region_skill_ratings_after_serie_df = pd.concat(data)
 
     nb_interregion_games_df = pd.Series(
         nb_interregion_games, index=serie_names
     )
 
-    return region_player_ratings_after_serie_df, nb_interregion_games_df
+    return region_skill_ratings_after_serie_df, nb_interregion_games_df
 
 
-def _get_player_ratings_of_region_at_a_given_point_in_time(
+def _get_skill_ratings_of_region_at_a_given_point_in_time(
     ratings_df: pd.DataFrame,
     region: str,
     date: str
@@ -319,11 +319,11 @@ def _get_player_ratings_of_region_at_a_given_point_in_time(
         row["meta_rating_after_mu"], row["meta_rating_after_sigma"],    
     ), axis=1).values
     new_overall_ratings = np.array([[mu, sigma] for (mu, sigma) in new_overall_ratings])
-    last_rating_for_players_in_last_regular_season["player_rating_after_mu"] = new_overall_ratings[:, 0]
-    last_rating_for_players_in_last_regular_season["player_rating_after_sigma"] = new_overall_ratings[:, 1]
-    last_rating_for_players_in_last_regular_season["player_rating_after"] = last_rating_for_players_in_last_regular_season.apply(
+    last_rating_for_players_in_last_regular_season["skill_rating_after_mu"] = new_overall_ratings[:, 0]
+    last_rating_for_players_in_last_regular_season["skill_rating_after_sigma"] = new_overall_ratings[:, 1]
+    last_rating_for_players_in_last_regular_season["skill_rating_after"] = last_rating_for_players_in_last_regular_season.apply(
         lambda row: lower_bound_rating(
-            row["player_rating_after_mu"], row["player_rating_after_sigma"]
+            row["skill_rating_after_mu"], row["skill_rating_after_sigma"]
         ),
         axis=1
     )
@@ -371,12 +371,12 @@ def _create_and_save_meta_rating_evolution(
         color = color_dict[region]
         marker = marker_dict[region]
 
-        mean_data = region_data.groupby("serie_name", observed=False)["player_rating_after"].mean().reset_index()
+        mean_data = region_data.groupby("serie_name", observed=False)["skill_rating_after"].mean().reset_index()
 
         sns.lineplot(
             data=mean_data, 
             x="serie_name", 
-            y="player_rating_after", 
+            y="skill_rating_after", 
             label=region, 
             color=color,
             errorbar=None, 
@@ -386,7 +386,7 @@ def _create_and_save_meta_rating_evolution(
         
         ax1.scatter(
             mean_data["serie_name"], 
-            mean_data["player_rating_after"], 
+            mean_data["skill_rating_after"], 
             color=color, 
             marker=marker,
             s=100

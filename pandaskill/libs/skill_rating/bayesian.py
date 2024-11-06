@@ -22,7 +22,7 @@ def compute_bayesian_ratings(
     use_meta_ratings: bool,
     rater_model: str, 
 ) -> pd.DataFrame:
-    all_player_ratings, all_region_ratings = _initialize_ratings(df)
+    all_skill_ratings, all_region_ratings = _initialize_ratings(df)
     rater_model = _instantiate_rater_model(rater_model)
 
     data_df = pd.pivot_table(
@@ -45,13 +45,13 @@ def compute_bayesian_ratings(
     rating_updates_dict = {}
     for game_id, row in ProgressBar(maxval=data_df.shape[0])(data_df.iterrows()):
         rating_updates_for_game = _compute_rating_updates_for_game(
-            row, all_player_ratings, all_region_ratings, rater_model, use_ffa_setting, use_meta_ratings
+            row, all_skill_ratings, all_region_ratings, rater_model, use_ffa_setting, use_meta_ratings
         )
         
         rating_updates_dict[game_id] = rating_updates_for_game
 
-        all_player_ratings, all_region_ratings = _apply_rating_updates(
-            rating_updates_for_game, all_player_ratings, all_region_ratings
+        all_skill_ratings, all_region_ratings = _apply_rating_updates(
+            rating_updates_for_game, all_skill_ratings, all_region_ratings
         )
     
     rating_updates_dict = [
@@ -59,7 +59,7 @@ def compute_bayesian_ratings(
         for game_id, rating_updates in rating_updates_dict.items()
         for rating_update in rating_updates
     ]
-    player_rating_updates_df = pd.DataFrame(
+    skill_rating_updates_df = pd.DataFrame(
         data=rating_updates_dict, 
         columns=[
             "game_id", "player_id", "region", 
@@ -67,19 +67,19 @@ def compute_bayesian_ratings(
             "contextual_rating_after", "meta_rating_after",
         ]
     )
-    player_rating_updates_df = player_rating_updates_df.set_index(["game_id", "player_id"])
-    player_rating_updates_df["player_rating_before"] = player_rating_updates_df.apply(
-        lambda row: _compute_overall_player_ratings(
+    skill_rating_updates_df = skill_rating_updates_df.set_index(["game_id", "player_id"])
+    skill_rating_updates_df["skill_rating_before"] = skill_rating_updates_df.apply(
+        lambda row: _compute_overall_skill_ratings(
             row["contextual_rating_before"], row["meta_rating_before"]
         ), axis=1
     )
-    player_rating_updates_df["player_rating_after"] = player_rating_updates_df.apply(
-        lambda row: _compute_overall_player_ratings(
+    skill_rating_updates_df["skill_rating_after"] = skill_rating_updates_df.apply(
+        lambda row: _compute_overall_skill_ratings(
             row["contextual_rating_after"], row["meta_rating_after"]
             ), axis=1
     )
 
-    return player_rating_updates_df
+    return skill_rating_updates_df
 
 def _instantiate_rater_model(model: str) -> Rater:
     if model == "openskill":
@@ -91,7 +91,7 @@ def _initialize_ratings(
     df: pd.DataFrame
 ) -> tuple[RatingDictType, RatingDictType]:
     player_ids = list(df.index.get_level_values(1).unique())
-    player_ratings_dict = {
+    skill_ratings_dict = {
         player_id: {
             "mu": DEFAULT_MU, 
             "sigma": DEFAULT_SIGMA,
@@ -110,11 +110,11 @@ def _initialize_ratings(
         for region in regions
     }
 
-    return player_ratings_dict, region_ratings_dict
+    return skill_ratings_dict, region_ratings_dict
 
 def _compute_rating_updates_for_game(
     data_for_game: pd.Series, 
-    all_player_ratings: RatingListType,
+    all_skill_ratings: RatingListType,
     all_region_ratings: RatingListType,
     model: callable,
     use_ffa_setting: bool, 
@@ -126,7 +126,7 @@ def _compute_rating_updates_for_game(
     game_region_changes = data_for_game["region_change"]
     meta_game = len(set(game_player_regions)) > 1 and use_meta_ratings
 
-    game_contextual_ratings = [all_player_ratings[id] for id in game_player_ids]
+    game_contextual_ratings = [all_skill_ratings[id] for id in game_player_ids]
     game_meta_ratings = [all_region_ratings[region] for region in game_player_regions]
 
     if use_meta_ratings:
@@ -194,7 +194,7 @@ def _compute_ratings_after_game(
 
     if use_ffa_setting:
         ffa_ratings_after_game = model.rate(
-            teams=[[player_rating] for player_rating in ratings_before_game_copy],
+            teams=[[skill_rating] for skill_rating in ratings_before_game_copy],
             scores=game_performance_scores,
         )
         ratings_after_game = [rating[0] for rating in ffa_ratings_after_game]
@@ -328,7 +328,7 @@ def _apply_rating_updates(
 
     return contextual_ratings_dict, meta_ratings_dict
 
-def _compute_overall_player_ratings(
+def _compute_overall_skill_ratings(
     contextual_rating: Dict[str, float], 
     meta_rating: Dict[str, float]
 ) -> Dict[str, float]:

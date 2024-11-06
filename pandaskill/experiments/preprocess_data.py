@@ -29,7 +29,7 @@ def preprocess_raw_data() -> None:
 
     stat_df = compute_features(stat_df, event_df)
     feature_columns = stat_df.columns.difference(initial_columns)
-    stat_df.loc[:, feature_columns].to_csv(join(data_dir, "preprocessing", "features.csv"))
+    stat_df.loc[:, feature_columns].to_csv(join(data_dir, "preprocessing", "game_features.csv"))
 
 if __name__ == "__main__":
     preprocess_raw_data()

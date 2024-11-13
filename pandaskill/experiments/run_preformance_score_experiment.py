@@ -73,7 +73,7 @@ if __name__ == "__main__":
         "visualization": {
             "visualize_shap_values": False, # activating this will significantly slow down the computation
             "specific_games_analysis": [
-                259674, # close game - LCK 2024
+                36348, # close game - LCK 2024
             ]
         }
     }

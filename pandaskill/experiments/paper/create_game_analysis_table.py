@@ -2,9 +2,9 @@
 This script can be used to generate the table with the performance scores and skill ratings for a given game.
 """
 
-game_id = 259674
+game_id = 36348
 
-performance_score_experiment = "pscore_test"
+performance_score_experiment = "pscore"
 skill_rating_experiment = "meta_ffa_openskill"
 
 import os
@@ -34,8 +34,8 @@ df = df.set_index(["game_id", "player_id"])
 
 df_game = df.loc[game_id]
 
-df_game["rating"] = df_game.skill_rating_after.apply(lambda r: eval(r)["lower_bound"])
-df_game["update"] = df_game["rating"] - df_game.skill_rating_before.apply(lambda r: eval(r)["lower_bound"])
+df_game["rating"] = df_game.skill_rating_after
+df_game["update"] = df_game["rating"] - df_game.skill_rating_before
 df_game = df_game.loc[:, ["player_name", "team_name", "role", "performance_score", "rating", "update"]]
 df_game = df_game.sort_values("performance_score", ascending=False)
 

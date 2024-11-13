@@ -6,7 +6,7 @@ def display_game_page(data):
 
     selection_method = st.radio("Select game by:", ["Enter Game ID", "Select via League and Series"])
     if selection_method == "Enter Game ID":
-        game_id_input = st.text_input("Enter Game ID:", value = "259674")
+        game_id_input = st.text_input("Enter Game ID:", value = "36348")
         if game_id_input:
             game_id = game_id_input.strip()
         else:

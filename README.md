@@ -32,6 +32,8 @@ pandaskill/artifacts/data/
 ├── preprocessing/ # features extracted from the raw data, used in the visualization app
 └── raw/ # raw data used to produce the experimental results
 ```
+<details>
+  <summary>Details for the `raw` subfolder content</summary>
 
 In particular, the `raw` subfolder contains 3 files: 
 - `game_metadata.csv`: metadata of the games
@@ -58,24 +60,24 @@ Note: every game can be incldued in a tree structure such that: `League > Serie 
     - `win`: whether the player has won the game or not
     - `game_length`: length of the game in seconds
     - `champion_name`: name of the Champion played by the player
-    - `team_kills`: total number of player kills of the player's team
+    - `team_kills`: total number of champion kills of the player's team
     - `tower_kills`: total number of tower kills of the player's team
     - `inhibitor_kills`: total number of inhibitor kills of the player's team
     - `dragon_kills`: total number of Drake kills of the player's team
     - `herald_kills`: total number of Rift Herald kills of the player's team
     - `baron_kills`: total number of Baron Nashor kills of the player's team
-    - `player_kills`: number of player kills of the player
-    - `player_deaths`: number of deaths of the player
-    - `player_assists`: 
-    - `total_minions_killed`: 
-    - `gold_earned`: 
-    - `level`: 
-    - `total_damage_dealt`: 
-    - `total_damage_dealt_to_champions`: 
-    - `total_damage_taken`: 
-    - `wards_placed`: 
-    - `largest_killing_spree`: 
-    - `largest_multi_kill`: 
+    - `player_kills`: player's number of champion kills
+    - `player_deaths`: player's number of deaths
+    - `player_assists`: player's number of assists
+    - `total_minions_killed`: player's number of minions killed
+    - `gold_earned`: player's total amount of gold earned
+    - `level`: player's final level (max 18)
+    - `total_damage_dealt`: damage dealt by the player, disregarding the target
+    - `total_damage_dealt_to_champions`: player's damage dealt to Champions
+    - `total_damage_taken`: player's damage taken, disregarding the source
+    - `wards_placed`: player's number of wards placed
+    - `largest_killing_spree`: player's largest killing spree
+    - `largest_multi_kill`: player's largest multi-kill (max 5)
 - `game_events.csv`:
     - `id`: ID of the event
     - `game_id`: ID of the game
@@ -85,7 +87,7 @@ Note: every game can be incldued in a tree structure such that: `League > Serie 
     - `killed_id`: ID of the killed if it exists
     - `assisting_player_ids`: list of ID of the assisting players
     - `drake_type`: type of the drake (e.g., `infernal`)
-
+</details>
 
 # TODO 
 - provide arxiv link to paper

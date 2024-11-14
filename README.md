@@ -7,20 +7,26 @@ Player performances and ratings can be visualized [here](https://pandaskill.stre
 
 # Installation
 
-1. Clone the repository:
+1. **Clone the repository with Git LFS:**
 
-```
-git clone https://github.com/PandaScore/PandaSkill.git
-cd PandaSkill
-```
+    Ensure you have Git LFS installed to handle large files. If Git LFS is not installed, follow these instructions to set it up.
 
-2. Set up the environment: Create a virtual environment and install dependencies:
+    Then, clone the repository and pull the large files:
 
-```
-conda create -n pandaskill python=3.12.7
-conda activate pandaskill
-pip install -r requirements.txt
-```
+    ```bash
+    git lfs install
+    git clone https://github.com/PandaScore/PandaSkill.git
+    cd PandaSkill
+    ```
+
+2. **Set up the environment:**
+    Create a virtual environment and install dependencies:
+
+    ```bash
+    conda create -n pandaskill python=3.12.7
+    conda activate pandaskill
+    pip install -r requirements.txt
+    ```
 
 # Data
 
@@ -35,7 +41,6 @@ pandaskill/artifacts/data/
 <details>
   <summary>Details for the `raw` subfolder content</summary>
 
-In particular, the `raw` subfolder contains 3 files: 
 - `game_metadata.csv`: metadata of the games
     - `game_id`: ID of the game
     - `date`: date
@@ -47,7 +52,7 @@ In particular, the `raw` subfolder contains 3 files:
     - `league_id`: ID of the league
     - `league_name`: name of the league (e.g., LCK)
 
-Note: every game can be incldued in a tree structure such that: `League > Serie > Tournament > Match > Game`.
+Note: every game can be included in a tree structure such that: `League > Serie > Tournament > Match > Game`.
 
 - `game_players_stats.csv`:
     - `game_id`: ID of the game
@@ -88,6 +93,22 @@ Note: every game can be incldued in a tree structure such that: `League > Serie 
     - `assisting_player_ids`: list of ID of the assisting players
     - `drake_type`: type of the drake (e.g., `infernal`)
 </details>
+
+# Reproducing Results
+
+To reproduce the results presented in the paper, follow these steps:
+
+1. **Compute the features from the raw data:**
+    - `python pandaskill/experiments/preprocess_data.py`
+    - This is optional, as features are already precomputed in `pandaskill/artifacts/data/preprocessing`
+2. **Compute the performance scores for each game:**
+    - `python pandaskill/experiments/run_performance_score_experiment.py`
+    - you can edit the configuration in the file itself, configurations used in the paper are provided
+3. **Compute the skill ratings:**
+    - `python pandaskill/experiments/run_skill_rating_experiment.py`
+    - you can edit the configuration in the file itself, configurations used in the paper are provided
+
+Results are located in `pandaskill/artifacts/experiments/`. 
 
 # TODO 
 - provide arxiv link to paper

@@ -76,7 +76,7 @@ def display_leaderboard_page(data):
         "pscore": "PScore",
         "skill_rating_mu": "Skill Rating Mu",
         "skill_rating_sigma": "Skill Rating Sigma",
-        "skill_rating": "Skill Rating (99.7\% CI)"
+        "skill_rating": "Skill Rating (99.7% CI)"
     })
 
     ranking_formatted = ranking_formatted.set_index("Rank")

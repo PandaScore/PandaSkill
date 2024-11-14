@@ -109,7 +109,7 @@ def _display_game_stats(data, game_id):
 
     with cols[2]:
         is_interregion_game = game_data['region'].nunique() > 1
-        interregion_game_str = f"Yes: {' vs '.join(game_data['region'].unique())}" if is_interregion_game else "No"
+        interregion_game_str = f"Yes" if is_interregion_game else "No"
         st.metric("Interregion Game", interregion_game_str)   
 
     detailed_stats_df = game_data[

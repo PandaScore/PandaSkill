@@ -7,35 +7,31 @@ from pandaskill.app.game_page import display_game_page
 
 st.set_page_config(layout="wide", page_icon=":panda_face:", page_title="PandaSkill")
 st.title("PandaSkill")
+st.info(
+    "PandaSkill is an app showing pro League of Legend player performances and skill ratings, following the methodology described in the paper [PandaSkill - Player Performance and Skill Rating in Esports: Application to League of Legends](https://arxiv.org/abs/2109.15098) by [PandaScore](https://pandascore.co/)."
+)   
 
 def run():
     data = get_all_data()
     
-    app = st.selectbox(
-        "Choose the app",
-        [
+    tabs = st.tabs([
             "Leaderboard",
             "Player / Team Evolution",
             "Region Evolution",
             "Game Analysis",
-        ],
-        0
-    )
-
-    if data is not None:
-
-        if app == "Leaderboard":
-            display_leaderboard_page(data)
-        elif app == "Game Analysis":
-            display_game_page(data)
-        elif app == "Player / Team Evolution":
-            display_player_team_page(data)
-        elif app == "Region Evolution":
-            display_region_page(data)
-        else:
-            st.error("Unknown app")
-    else:
-        st.warning("Please select the experiments first")
+        ])
+    
+    with tabs[0]:
+        display_leaderboard_page(data)
+    with tabs[1]:
+        display_player_team_page(data)
+    with tabs[2]:
+        display_region_page(data)
+    with tabs[3]: 
+        display_game_page(data)
+        
+    st.divider()
+    st.markdown("Interested in building projects with esports data? Check out the [PandaScore API](https://developers.pandascore.co/docs/introduction)!")
 
 if __name__ == "__main__":
     run()

@@ -65,9 +65,23 @@ def display_leaderboard_page(data):
     else:   
         ranking = ranking.loc[:, ["rank", "player_name", "team_name", "role", "region", "nb_games", "last_game_date", "pscore", "skill_rating_mu", "skill_rating_sigma", "skill_rating"]]
 
-    ranking = ranking.set_index("rank")
+    ranking_formatted = ranking.rename(columns={
+        "rank": "Rank",
+        "player_name": "Player",
+        "team_name": "Team",
+        "role": "Role",
+        "region": "Region",
+        "nb_games": "Nb Games",
+        "last_game_date": "Last Game Date",
+        "pscore": "PScore",
+        "skill_rating_mu": "Skill Rating Mu",
+        "skill_rating_sigma": "Skill Rating Sigma",
+        "skill_rating": "Skill Rating (99.7\% CI)"
+    })
+
+    ranking_formatted = ranking_formatted.set_index("Rank")
     
-    st.dataframe(ranking, use_container_width=True)
+    st.dataframe(ranking_formatted, use_container_width=True)
  
     display_distributions(ranking)
 

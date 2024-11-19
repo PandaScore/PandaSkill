@@ -171,7 +171,7 @@ def _save_team_ranking(
     team_ranking.to_csv(join(saving_dir, "team_ranking.csv"), index=False)
 
 def evaluate_ranking(ranking: pd.DataFrame, experiment_dir: str) -> None:
-    data_dir = join(ARTIFACTS_DIR, "data", "expert_surveys")
+    data_dir = join(ARTIFACTS_DIR, "data", "survey")
     
     player_id_to_rating_mapping = ranking[["player_id", "skill_rating"]].set_index("player_id").to_dict()["skill_rating"]
 

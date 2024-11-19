@@ -99,8 +99,7 @@ def test_compute_ratings_before_game():
     ratings_before = _compute_ratings_before_game(
         player_contextual_ratings, player_meta_ratings, model, meta_game
     )
-    expected_mu_0 = player_contextual_ratings[0]['mu'] + player_meta_ratings[0]['lower_bound']
-    assert ratings_before[0].mu == expected_mu_0
+    assert ratings_before[0].mu == player_contextual_ratings[0]['mu']
     assert ratings_before[0].sigma == player_contextual_ratings[0]['sigma']
 
 def test_combine_contextual_and_meta_ratings():
@@ -198,9 +197,9 @@ def test_compute_ratings_after_contextual_game():
         contextual_ratings_in_game, meta_ratings_in_game
     )
 
-    expected_p1_contextual_rating_after_game = {'mu': 20.0, 'sigma': 7.0, 'lower_bound': lower_bound_rating(20.0, 7.0)}  
+    expected_p1_contextual_rating_after_game = {'mu': 28.0, 'sigma': 7.0, 'lower_bound': lower_bound_rating(28.0, 7.0)}  
     expected_p1_meta_rating_after_game = p1_meta_rating
-    expected_p2_contextual_rating_after_game = {'mu': 17.0, 'sigma': 6.0, 'lower_bound': lower_bound_rating(17.0, 6.0)}
+    expected_p2_contextual_rating_after_game = {'mu': 26.0, 'sigma': 6.0, 'lower_bound': lower_bound_rating(26.0, 6.0)}
     expected_p2_meta_rating_after_game = p2_meta_rating
 
     expected_rating_updates = [

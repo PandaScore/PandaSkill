@@ -169,10 +169,10 @@ def _compute_ratings_before_game(
     else:      
         full_ratings_before_game = [
             model.rating(
-                player_contextual_rating["mu"] + player_meta_rating["lower_bound"], 
+                player_contextual_rating["mu"],
                 player_contextual_rating["sigma"]
             )
-            for player_contextual_rating, player_meta_rating in zip(player_contextual_ratings, player_meta_ratings)
+            for player_contextual_rating in player_contextual_ratings
         ]     
 
     return full_ratings_before_game
@@ -240,7 +240,7 @@ def _compute_ratings_after_contextual_game(
         full_ratings_after_game
     ):
         contextual_rating_after = {
-            "mu": full_rating_after.mu - meta_rating_before["lower_bound"],
+            "mu": full_rating_after.mu,
             "sigma": full_rating_after.sigma
         }
         contextual_rating_after["lower_bound"] = lower_bound_rating(*contextual_rating_after.values())

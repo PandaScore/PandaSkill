@@ -55,7 +55,7 @@ def _drop_rows_with_wrong_value(
     return stat_df[~feature_wrong_value_mask], feature_wrong_value_dropped_game_ids
 
 def _drop_games_with_nans(stat_df: pd.DataFrame) -> Tuple[pd.DataFrame, list]:
-    non_na_mask = ~stat_df.drop("serie_name", axis=1).isna().any(axis=1)
+    non_na_mask = ~stat_df.drop("series_name", axis=1).isna().any(axis=1)
     nan_cells_dropped_game_ids = stat_df[~non_na_mask].index.get_level_values("game_id").unique().values.astype(int).tolist()
     logging.info(f"Dropping {len(nan_cells_dropped_game_ids)} games due to NaN cells: \
         {nan_cells_dropped_game_ids}")

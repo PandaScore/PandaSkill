@@ -55,12 +55,12 @@ pandaskill/artifacts/data/
     - `match_id`: ID of the match (e.g., a BO5 is a match of max 5 games)
     - `tournament_id`: ID of the tournament
     - `tournament_name`: name of the tournament (e.g., Playoffs)
-    - `serie_id`: ID of the serie
-    - `serie_name`: name of the serie (e.g., LCK Summer 2024)
+    - `series_id`: ID of the serie
+    - `series_name`: name of the series (e.g., LCK Summer 2024)
     - `league_id`: ID of the league
     - `league_name`: name of the league (e.g., LCK)
 
-Note: every game can be included in a tree structure such that: `Game ⊆ Match ⊆ Tournament ⊆ Serie ⊆ League`.
+Note: every game can be included in a tree structure such that: `Game ⊆ Match ⊆ Tournament ⊆ Series ⊆ League`.
 
 - `game_players_stats.csv`:
     - `game_id`: ID of the game

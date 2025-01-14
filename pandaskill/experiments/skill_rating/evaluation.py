@@ -178,7 +178,7 @@ def _compute_intra_inter_region_metrics(
     region_agg_games_df = data_with_ratings.groupby("game_id").agg({"region": region_agg_rule})
     region_agg_game_ids = region_agg_games_df[region_agg_games_df.values].index.values
     region_agg_game_ids_test_list_index = np.where(np.isin(game_id_test_list, region_agg_game_ids))[0]
-    nb_region_agg_games_per_serie = data_with_ratings.loc[region_agg_games_df[region_agg_games_df.values].index].serie_name.value_counts() // 10
+    nb_region_agg_games_per_series = data_with_ratings.loc[region_agg_games_df[region_agg_games_df.values].index].series_name.value_counts() // 10
     
     y_test_list_region_agg = np.array(y_test_list)[region_agg_game_ids_test_list_index]
     y_prob_list_region_agg = np.array(y_prob_list)[region_agg_game_ids_test_list_index]

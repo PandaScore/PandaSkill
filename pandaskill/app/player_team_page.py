@@ -57,7 +57,7 @@ def display_player_team_page(data):
             team_data = data.loc[data["team_id"].isin(selected_team_ids)].copy()
             team_data["entity_name"] = team_data["team_name"]
             ratings = team_data.groupby(["entity_name", "game_id", "date"]).agg(
-                serie_name=("serie_name", "first"),
+                series_name=("series_name", "first"),
                 tournament_name=("tournament_name", "first"),
                 pscore=("pscore", "mean"),
                 skill_rating_mu=("skill_rating_mu", "mean"),
@@ -101,7 +101,7 @@ def display_player_evolution(skill_ratings, comparing_entities):
     skill_ratings["skill_rating_997%"] = skill_ratings["skill_rating_mu"] + 3 * skill_ratings["skill_rating_sigma"]
     secondary_y_axis = "pscore"
 
-    skill_ratings["pscore_mean"] = skill_ratings.groupby("serie_name")["pscore"].transform("mean")
+    skill_ratings["pscore_mean"] = skill_ratings.groupby("series_name")["pscore"].transform("mean")
     
     show_settings_columns = st.columns([2, 8])
     with show_settings_columns[0]:
@@ -120,7 +120,7 @@ def display_player_evolution(skill_ratings, comparing_entities):
     nearest = alt.selection_point(nearest=True, on='mouseover',
                     fields=['index'], empty=False)
 
-    tooltip = ['date:T', 'entity_name:N', "serie_name:N", "tournament_name:N", 'game_id:N',  'skill_rating:Q', 'skill_rating_mu:Q', 'skill_rating_sigma:Q']
+    tooltip = ['date:T', 'entity_name:N', "series_name:N", "tournament_name:N", 'game_id:N',  'skill_rating:Q', 'skill_rating_mu:Q', 'skill_rating_sigma:Q']
     if show_pscore:
         tooltip.append('pscore:Q')
 
@@ -171,7 +171,7 @@ def display_player_evolution(skill_ratings, comparing_entities):
         metrics_chart = base.mark_point().encode(
             x='index:Q',
             y=f'{secondary_y_axis}:Q',
-            color="serie_name:N"
+            color="series_name:N"
         ).properties(
             width=800,
             height=800
@@ -181,7 +181,7 @@ def display_player_evolution(skill_ratings, comparing_entities):
             x='index:Q',
             y=alt.Y(f"{secondary_y_axis}_mean:Q").title(""),
             opacity=alt.value(0.8),
-            color="serie_name:N"
+            color="series_name:N"
         ).properties(
             width=800,
             height=800
@@ -192,7 +192,7 @@ def display_player_evolution(skill_ratings, comparing_entities):
             y=alt.Y(f"{secondary_y_axis}_5%:Q").title(f"{secondary_y_axis}"),
             y2=alt.Y2(f"{secondary_y_axis}_99.7%:Q"),
             opacity=alt.value(0.2),
-            color="serie_name:N"
+            color="series_name:N"
         ).properties(
             width=800,
             height=800

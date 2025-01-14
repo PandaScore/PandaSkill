@@ -17,15 +17,15 @@ def _select_game_id(data):
     selected_league = st.selectbox("Select League:", leagues, index=default_league_index)
     data_league = data[data['league_name'] == selected_league]
 
-    series = data_league['serie_name'].dropna().unique().tolist()
+    series = data_league['series_name'].dropna().unique().tolist()
     default_series_index = series.index("LCK Summer 2024") if selected_league == "LCK" else 0
     selected_series = st.selectbox("Select Series:", series, index=default_series_index)
-    data_serie = data_league[data_league['serie_name'] == selected_series]
+    data_series = data_league[data_league['series_name'] == selected_series]
 
-    tournaments = data_serie["tournament_name"].dropna().unique().tolist()
+    tournaments = data_series["tournament_name"].dropna().unique().tolist()
     default_tournament_index = tournaments.index("Playoffs") if selected_series == "LCK Summer 2024" else 0
     selected_tournament = st.selectbox("Select Tournament:", tournaments, index=default_tournament_index)
-    data_tournament = data_serie[data_serie['tournament_name'] == selected_tournament]
+    data_tournament = data_series[data_series['tournament_name'] == selected_tournament]
 
     game_options = _construct_game_options(data_tournament)
 
@@ -100,7 +100,7 @@ def _display_game_stats(data, game_id):
     with cols[0]:
         st.write(f"Date: {pd.to_datetime(str(game_data['date'].values[0])).strftime('%Y-%m-%d')}")
         st.write(f"League: {game_data['league_name'].values[0]}")
-        st.write(f"Series: {game_data['serie_name'].values[0]}")
+        st.write(f"Series: {game_data['series_name'].values[0]}")
         st.write(f"Tournament: {game_data['tournament_name'].values[0]}")
         st.write(f"Match ID: {game_data['match_id'].values[0]}")
 

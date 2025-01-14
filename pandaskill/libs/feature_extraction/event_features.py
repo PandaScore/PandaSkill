@@ -106,8 +106,8 @@ def _evaluate_deaths_worthlessness(event_df: pd.DataFrame, window: int=30) -> pd
             total=groupby_game_id.ngroups,
             desc="Evaluating death events worthlessness for games"
         ))    
-    worthless_deaths_serie = pd.concat(results)
-    return worthless_deaths_serie
+    worthless_deaths_series = pd.concat(results)
+    return worthless_deaths_series
 
 def _evaluate_deaths_worthlessness_for_game(args: Tuple[pd.DataFrame, int]) -> pd.Series:
     game_df, window = args
@@ -144,9 +144,9 @@ def _evaluate_deaths_worthlessness_for_game(args: Tuple[pd.DataFrame, int]) -> p
         
         death_is_worthless[i] = not np.any(positive_event_participation | objective_taken_by_his_team)
     
-    worthless_death_serie = pd.Series(death_is_worthless, index=game_df.index)
+    worthless_death_series = pd.Series(death_is_worthless, index=game_df.index)
 
-    return worthless_death_serie
+    return worthless_death_series
 
 def _count_nb_worthless_deaths(event_df: pd.DataFrame) -> pd.Series:
     nb_worthless_deaths = event_df[event_df.death_is_worthless.notna()] \

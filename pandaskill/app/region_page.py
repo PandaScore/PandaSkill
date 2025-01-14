@@ -1,4 +1,4 @@
-from pandaskill.experiments.skill_rating.visualization import construct_skill_ratings_for_region_after_serie
+from pandaskill.experiments.skill_rating.visualization import construct_skill_ratings_for_region_after_series
 import streamlit as st
 import pandas as pd
 import altair as alt
@@ -7,46 +7,46 @@ def display_region_page(data):
     st.header("Region Evolution Page")
 
     data["date"] = data["date"].astype(str)
-    ratings_in_region_after_serie, nb_games_in_serie = _get_region_ratings(data)
+    ratings_in_region_after_series, nb_games_in_series = _get_region_ratings(data)
 
-    desired_serie_order = ratings_in_region_after_serie['serie_name'].unique().tolist()
+    desired_series_order = ratings_in_region_after_series['series_name'].unique().tolist()
 
-    num_tournaments = len(desired_serie_order)
+    num_tournaments = len(desired_series_order)
     desired_chart_width = max(800, num_tournaments * 50)
     show_top10 = st.checkbox("Show Top 10 Players For Each Region", value=False)
     if show_top10:        
-        ratings_in_region_after_serie = ratings_in_region_after_serie.sort_values(
-            by=['serie_name', 'region', 'skill_rating_after'], 
+        ratings_in_region_after_series = ratings_in_region_after_series.sort_values(
+            by=['series_name', 'region', 'skill_rating_after'], 
             ascending=[True, True, False]
         )
-        ratings_in_region_after_serie = ratings_in_region_after_serie.groupby(['serie_name', 'region'], observed=False).head(10).reset_index()
+        ratings_in_region_after_series = ratings_in_region_after_series.groupby(['series_name', 'region'], observed=False).head(10).reset_index()
     
     chart = _create_meta_rating_evolution_chart(
-        ratings_in_region_after_serie,
-        nb_games_in_serie,
-        desired_serie_order,
+        ratings_in_region_after_series,
+        nb_games_in_series,
+        desired_series_order,
         title='Average Skill Rating Evolution by Region'
     )
     st.altair_chart(chart.properties(width=desired_chart_width), use_container_width=True)
 
 @st.cache_data
 def _get_region_ratings(data):
-    return construct_skill_ratings_for_region_after_serie(data)
+    return construct_skill_ratings_for_region_after_series(data)
 
 def _create_meta_rating_evolution_chart(
-    ratings_in_region_after_serie: pd.DataFrame,
-    nb_games_in_serie: pd.Series,
-    desired_serie_order: list,
+    ratings_in_region_after_series: pd.DataFrame,
+    nb_games_in_series: pd.Series,
+    desired_series_order: list,
     title: str = None
 ) -> alt.Chart:
-    mean_data = ratings_in_region_after_serie.groupby(['region', 'serie_name'])['skill_rating_after'].mean().reset_index()
+    mean_data = ratings_in_region_after_series.groupby(['region', 'series_name'])['skill_rating_after'].mean().reset_index()
 
-    nb_games_in_serie_df = nb_games_in_serie.reset_index()
-    nb_games_in_serie_df.columns = ['serie_name', 'nb_games']
+    nb_games_in_series_df = nb_games_in_series.reset_index()
+    nb_games_in_series_df.columns = ['series_name', 'nb_games']
 
     base = alt.Chart(mean_data).encode(
         x=alt.X(
-            'serie_name:N',
+            'series_name:N',
             axis=alt.Axis(
                 title='Tournament',
                 labelAngle=-90,
@@ -55,7 +55,7 @@ def _create_meta_rating_evolution_chart(
                 labelFontSize=10,
                 labelSeparation=5
             ),
-            sort=desired_serie_order
+            sort=desired_series_order
         ),
     )
 
@@ -68,13 +68,13 @@ def _create_meta_rating_evolution_chart(
         y=alt.Y('skill_rating_after:Q', axis=None),
         color=alt.Color('region:N', legend=None),
         shape=alt.Shape('region:N', legend=None),
-        tooltip=['region', 'serie_name', alt.Tooltip('skill_rating_after:Q', format='.2f')]
+        tooltip=['region', 'series_name', alt.Tooltip('skill_rating_after:Q', format='.2f')]
     )
 
-    bar_chart = alt.Chart(nb_games_in_serie_df).mark_bar(opacity=0.3, color='lightgrey').encode(
+    bar_chart = alt.Chart(nb_games_in_series_df).mark_bar(opacity=0.3, color='lightgrey').encode(
         x=alt.X(
-            'serie_name:N',
-            sort=desired_serie_order,
+            'series_name:N',
+            sort=desired_series_order,
             axis=alt.Axis(
                 labels=False,
                 title=None
@@ -118,6 +118,6 @@ if __name__ == "__main__":
         drop_na=True
     )
 
-    region_ratings, _ = construct_skill_ratings_for_region_after_serie(data)
+    region_ratings, _ = construct_skill_ratings_for_region_after_series(data)
 
     print(region_ratings.head())

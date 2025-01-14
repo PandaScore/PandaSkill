@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from pandaskill.experiments.data.player_region import MAIN_LEAGUE_SERIE_TOURNAMENT_WHITELIST
+from pandaskill.experiments.data.player_region import MAIN_LEAGUE_SERIES_TOURNAMENT_WHITELIST
 from pandaskill.experiments.general.utils import ROLES, ALL_REGIONS
 from pandaskill.experiments.general.visualization import plot_violin_distributions
 from pandaskill.libs.skill_rating.bayesian import lower_bound_rating, combine_contextual_and_meta_ratings
@@ -87,34 +87,34 @@ def _visualize_meta_rating_evolution(
     ratings_df: pd.DataFrame,
     experiment_dir: str,
 ) -> None:
-    region_skill_ratings_after_serie_df, nb_interregion_games_per_serie = construct_skill_ratings_for_region_after_serie(
+    region_skill_ratings_after_series_df, nb_interregion_games_per_series = construct_skill_ratings_for_region_after_series(
         ratings_df
     )
-    if region_skill_ratings_after_serie_df.empty:
+    if region_skill_ratings_after_series_df.empty:
         return 
 
     _create_and_save_meta_rating_evolution(
-        region_skill_ratings_after_serie_df, 
-        nb_interregion_games_per_serie,
+        region_skill_ratings_after_series_df, 
+        nb_interregion_games_per_series,
         "Average per region skill rating Evolution after inter-region games",
-        "skill_rating_evolution_per_serie_and_region_mean.png", 
+        "skill_rating_evolution_per_series_and_region_mean.png", 
         experiment_dir
     )
 
-    sorted_df = region_skill_ratings_after_serie_df.sort_values(
-        by=['serie_name', 'region', 'skill_rating_after'], 
+    sorted_df = region_skill_ratings_after_series_df.sort_values(
+        by=['series_name', 'region', 'skill_rating_after'], 
         ascending=[True, True, False]
     )
-    top_10_players = sorted_df.groupby(['serie_name', 'region'], observed=False).head(10).reset_index()
+    top_10_players = sorted_df.groupby(['series_name', 'region'], observed=False).head(10).reset_index()
     _create_and_save_meta_rating_evolution(
         top_10_players,
-        nb_interregion_games_per_serie,
+        nb_interregion_games_per_series,
         "Top 10 per region skill rating evolution after inter-region games",
-        "skill_rating_evolution_per_serie_and_region_best.png",
+        "skill_rating_evolution_per_series_and_region_best.png",
         experiment_dir
     )
 
-def construct_skill_ratings_for_region_after_serie(
+def construct_skill_ratings_for_region_after_series(
     ratings_df: pd.DataFrame
 ) -> tuple[pd.DataFrame, pd.Series]:    
     interregion_ratings = ratings_df[
@@ -126,29 +126,29 @@ def construct_skill_ratings_for_region_after_serie(
 
     data = []
     nb_interregion_games = []
-    serie_names = interregion_ratings.serie_name.unique()
-    for serie_name in serie_names:
-        serie_interregion_data = interregion_ratings[interregion_ratings.serie_name == serie_name]
-        serie_end_date = ratings_df[ratings_df.serie_name == serie_name]["date"].max()
-        for region in serie_interregion_data.region.unique():
-            ratings_in_region_after_serie = _get_skill_ratings_of_region_at_a_given_point_in_time(
-                ratings_df, region, serie_end_date
+    series_names = interregion_ratings.series_name.unique()
+    for series_name in series_names:
+        series_interregion_data = interregion_ratings[interregion_ratings.series_name == series_name]
+        series_end_date = ratings_df[ratings_df.series_name == series_name]["date"].max()
+        for region in series_interregion_data.region.unique():
+            ratings_in_region_after_series = _get_skill_ratings_of_region_at_a_given_point_in_time(
+                ratings_df, region, series_end_date
             )
-            ratings_after_serie = ratings_in_region_after_serie.loc[:, ["skill_rating_after"]]
-            ratings_after_serie["region"] = region
-            ratings_after_serie["serie_name"] = serie_name            
-            data.append(ratings_after_serie)
+            ratings_after_series = ratings_in_region_after_series.loc[:, ["skill_rating_after"]]
+            ratings_after_series["region"] = region
+            ratings_after_series["series_name"] = series_name            
+            data.append(ratings_after_series)
 
-        nb_interregion_games_for_serie = len(serie_interregion_data.index.get_level_values(0).unique())
-        nb_interregion_games.append(nb_interregion_games_for_serie)
+        nb_interregion_games_for_series = len(series_interregion_data.index.get_level_values(0).unique())
+        nb_interregion_games.append(nb_interregion_games_for_series)
 
-    region_skill_ratings_after_serie_df = pd.concat(data)
+    region_skill_ratings_after_series_df = pd.concat(data)
 
     nb_interregion_games_df = pd.Series(
-        nb_interregion_games, index=serie_names
+        nb_interregion_games, index=series_names
     )
 
-    return region_skill_ratings_after_serie_df, nb_interregion_games_df
+    return region_skill_ratings_after_series_df, nb_interregion_games_df
 
 
 def _get_skill_ratings_of_region_at_a_given_point_in_time(
@@ -197,8 +197,8 @@ def _get_skill_ratings_of_region_at_a_given_point_in_time(
 
 
 def _create_and_save_meta_rating_evolution(
-    ratings_in_region_after_serie: pd.DataFrame, 
-    nb_games_in_serie: pd.Series,
+    ratings_in_region_after_series: pd.DataFrame, 
+    nb_games_in_series: pd.Series,
     title: str, 
     file_name: str, 
     saving_dir: str
@@ -224,23 +224,23 @@ def _create_and_save_meta_rating_evolution(
     marker_dict = dict(zip(ALL_REGIONS, markers[:len(ALL_REGIONS)]))
 
     ax2.bar(
-        nb_games_in_serie.index, 
-        nb_games_in_serie.values, 
+        nb_games_in_series.index, 
+        nb_games_in_series.values, 
         color='lightgrey', 
         alpha=1.0
     )
     ax2.set_ylabel("Number of Inter-region Games Played")
 
     for region in ALL_REGIONS:
-        region_data = ratings_in_region_after_serie[ratings_in_region_after_serie['region'] == region]
+        region_data = ratings_in_region_after_series[ratings_in_region_after_series['region'] == region]
         color = color_dict[region]
         marker = marker_dict[region]
 
-        mean_data = region_data.groupby("serie_name", observed=False)["skill_rating_after"].mean().reset_index()
+        mean_data = region_data.groupby("series_name", observed=False)["skill_rating_after"].mean().reset_index()
 
         sns.lineplot(
             data=mean_data, 
-            x="serie_name", 
+            x="series_name", 
             y="skill_rating_after", 
             label=region, 
             color=color,
@@ -250,7 +250,7 @@ def _create_and_save_meta_rating_evolution(
         
         
         ax1.scatter(
-            mean_data["serie_name"], 
+            mean_data["series_name"], 
             mean_data["skill_rating_after"], 
             color=color, 
             marker=marker,

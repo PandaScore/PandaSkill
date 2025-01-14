@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 import logging
 import pandas as pd
 
-MAIN_LEAGUE_SERIE_TOURNAMENT_WHITELIST = {
+MAIN_LEAGUE_SERIES_TOURNAMENT_WHITELIST = {
     "Korea": {
         f"LCK {season} {year}": ["Regular Season"]
         for year in range(2019, 2025) 
@@ -92,29 +92,29 @@ regular_season_team_names_before_data = {
     "Latin America": ["Furious Gaming", "Isurus", "Kaos Latin Gamers", "Rainbow7", "Pixel Esports Club", "All Knights", "XTEN Esports", "Infinity Esports"],
 }
 
-SERIE_NAME_TO_REGION_MAPPING = {
-    serie_name: region 
-    for region, serie_dict in MAIN_LEAGUE_SERIE_TOURNAMENT_WHITELIST.items() 
-    for serie_name in serie_dict.keys()
+SERIES_NAME_TO_REGION_MAPPING = {
+    series_name: region 
+    for region, series_dict in MAIN_LEAGUE_SERIES_TOURNAMENT_WHITELIST.items() 
+    for series_name in series_dict.keys()
 }
 
 def attribute_player_in_game_to_region(df: pd.DataFrame) -> pd.DataFrame:
     regular_season_tournaments = []
-    for league, series in MAIN_LEAGUE_SERIE_TOURNAMENT_WHITELIST.items():
-        for serie_name, tournaments in series.items():
+    for league, series in MAIN_LEAGUE_SERIES_TOURNAMENT_WHITELIST.items():
+        for series_name, tournaments in series.items():
             for tournament in tournaments:
-                regular_season_tournaments.append((serie_name, tournament))
-    mask_df = pd.DataFrame(regular_season_tournaments, columns=['serie_name', 'tournament_name'])
+                regular_season_tournaments.append((series_name, tournament))
+    mask_df = pd.DataFrame(regular_season_tournaments, columns=['series_name', 'tournament_name'])
     regular_season_df = df.reset_index().merge(
-        mask_df, on=["serie_name", "tournament_name"]
+        mask_df, on=["series_name", "tournament_name"]
     ).set_index(["game_id", "player_id"])
     
     main_regions_series_participants_df = regular_season_df.groupby(
-        "serie_name"
+        "series_name"
     ).agg({
         "league_name": lambda x: x.iloc[0], 
         "date": lambda x: x.iloc[0], 
-        "team_id": lambda team_id_for_serie_serie: list(team_id_for_serie_serie.unique())
+        "team_id": lambda team_id_for_series_series: list(team_id_for_series_series.unique())
     })
     main_regions_series_participants_df = main_regions_series_participants_df.sort_values("date")
     
@@ -160,7 +160,7 @@ def _create_main_regions_participants_lookup(
                 "start_date": start_date,
                 "end_date": end_date,
                 "league_name": league_name,
-                "region": SERIE_NAME_TO_REGION_MAPPING[row.name]
+                "region": SERIES_NAME_TO_REGION_MAPPING[row.name]
             })
     
     for team_id in lookup:
@@ -188,10 +188,10 @@ def _create_main_regions_participants_lookup(
                         }
                     ]
                 else:
-                    start_next_serie = lookup[team_id][-1]["start_date"]
+                    start_next_series = lookup[team_id][-1]["start_date"]
                     lookup[team_id].append({
                         "start_date": absolute_start_date,
-                        "end_date": start_next_serie,
+                        "end_date": start_next_series,
                         "league_name": "Unknown",
                         "region": region
                     })
@@ -219,12 +219,12 @@ def manually_correct_team_region(df: pd.DataFrame) -> pd.DataFrame:
     df = _attribute_region_to_showmatches_2023(df)
 
     df.loc[
-        (df.serie_name == "Prime League 1st Division Spring 2022")
+        (df.series_name == "Prime League 1st Division Spring 2022")
         & (df.team_name == "FC Schalke 04 Esports")
     , "region"] = "Other" # they don't participate in the LEC Spring split that starts few days later
 
     df.loc[
-        (df.serie_name == "LMF Opening 2023")
+        (df.series_name == "LMF Opening 2023")
         & (df.team_name == "Globant Emerald")
     , "region"] = "Other" # they did not qualify to the LLA Opening 2023
 
@@ -232,20 +232,20 @@ def manually_correct_team_region(df: pd.DataFrame) -> pd.DataFrame:
 
 def _fix_kespa_cup_regions(df: pd.DataFrame) -> pd.DataFrame:    
     df.loc[
-        (df.serie_name == "KeSPA Cup 2019")
+        (df.series_name == "KeSPA Cup 2019")
         & (df.team_name == "T1")
     , "region"] = "Korea" # SK telecom T1 renamed to T1
     df.loc[
-        (df.serie_name == "KeSPA Cup 2019")
+        (df.series_name == "KeSPA Cup 2019")
         & (df.team_name == "DRX")
     , "region"] = "Korea" # Kingzone DragonX renamed to DRX
     
     df.loc[
-        (df.serie_name == "KeSPA Cup 2020")
+        (df.series_name == "KeSPA Cup 2020")
         & (df.team_name == "Nongshim Red Force")
     , "region"] = "Korea" # Team Dynamics renamed to Nongshim Red Force
     df.loc[
-        (df.serie_name == "KeSPA Cup 2020")
+        (df.series_name == "KeSPA Cup 2020")
         & (df.team_name == "BRION")
     , "region"] = "Korea" # Brion Blade renamed to BRION
     
@@ -253,25 +253,25 @@ def _fix_kespa_cup_regions(df: pd.DataFrame) -> pd.DataFrame:
 
 def _fix_demacia_cup_regions(df: pd.DataFrame) -> pd.DataFrame:
     df.loc[
-        (df.serie_name == "Demacia Cup 2019")
+        (df.series_name == "Demacia Cup 2019")
         & (df.team_name == "FunPlux Phoenix")
     , "region"] = "Other" # FunPlus Phoenix plays with academy roster
     df.loc[
-        (df.serie_name == "Demacia Cup 2019")
+        (df.series_name == "Demacia Cup 2019")
         & (df.team_name == "Invictus Gaming")
     , "region"] = "Other" # Invictus Gaming plays with academy roster + new players
 
     df.loc[
-        (df.serie_name == "Demacia Cup 2020")
+        (df.series_name == "Demacia Cup 2020")
         & (df.team_name == "ThunderTalk Gaming")
     , "region"] = "China" # Dominus Esports renamed to ThunderTalk Gaming
 
     df.loc[
-        (df.serie_name == "Demacia Cup 2021")
+        (df.series_name == "Demacia Cup 2021")
         & (df.team_name == "Anyone's Legend")
     , "region"] = "China" # Rogue Warrors renamed to Anyone's Legend
     df.loc[
-        (df.serie_name == "Demacia Cup 2021")
+        (df.series_name == "Demacia Cup 2021")
         & (df.team_name == "Weibo Gaming")
     , "region"] = "China" # Suning renamed to Weibo Gaming
 
@@ -302,14 +302,14 @@ def _attribute_region_to_all_star_2020(df: pd.DataFrame) -> pd.DataFrame:
     }
     for team_name, region in team_name_region_map.items():
         df.loc[
-            (df.serie_name == "All-Star 2020")
+            (df.series_name == "All-Star 2020")
             & (df.team_name == team_name)
         , "region"] = region
 
     return df
 
 def _attribute_region_to_showmatches_2023(df: pd.DataFrame) -> pd.DataFrame:
-    serie_name_to_region_map = {
+    series_name_to_region_map = {
         "Season Kickoff Latin America 2023": "Latin America",
         "Season Kickoff EMEA 2023": "Europe",
         "Season Kickoff Pacific 2023": "Asia-Pacific",
@@ -320,9 +320,9 @@ def _attribute_region_to_showmatches_2023(df: pd.DataFrame) -> pd.DataFrame:
         "Season Kickoff Korea 2023": "Korea",
     }
 
-    for serie_name, region in serie_name_to_region_map.items():
+    for series_name, region in series_name_to_region_map.items():
         df.loc[
-            (df.serie_name == serie_name)
+            (df.series_name == series_name)
         , "region"] = region
     
     return df

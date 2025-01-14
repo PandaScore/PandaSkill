@@ -31,6 +31,7 @@ def run():
         display_game_page(data)
         
     st.divider()
+    st.markdown("This app is open-source under the [MIT License](https://github.com/PandaScore/PandaSkill/blob/main/LICENSE).")
     st.markdown("Interested in building projects with esports data? Check out the [PandaScore API](https://developers.pandascore.co/docs/introduction)!")
 
 if __name__ == "__main__":

@@ -276,7 +276,6 @@ def _openskill_ranking_evaluation(ranking: pd.DataFrame, player_comparison_df: p
     y_prob_list = player_comparison_df['model_player_0_is_better'].values.tolist()
     y_true_list = player_comparison_df['expert_majority_player_0_is_better'].values.tolist()
     nbins = int(np.sqrt(len(y_true_list)))
-    brier_score = brier_score_loss(y_true_list, y_prob_list)
     ece = compute_ece(y_true_list, y_prob_list, nbins)
 
     experiment_dir = join(experiment_dir, "rankings")
@@ -292,7 +291,6 @@ def _openskill_ranking_evaluation(ranking: pd.DataFrame, player_comparison_df: p
     expert_unanimous_mask = player_comparison_df[player_comparison_df["experts_are_unanimous"]].index.tolist()
     y_prob_list = player_comparison_df.loc[expert_unanimous_mask, 'model_player_0_is_better'].values.tolist()
     y_true_list = player_comparison_df.loc[expert_unanimous_mask, 'expert_majority_player_0_is_better'].values.tolist()
-    brier_score_unanimous = brier_score_loss(y_true_list, y_prob_list)
     ece_unanimous = compute_ece(y_true_list, y_prob_list, nbins)
     plot_model_calibration(
         y_true_list, 
@@ -307,8 +305,6 @@ def _openskill_ranking_evaluation(ranking: pd.DataFrame, player_comparison_df: p
     concordance_metrics = _compute_concordance_metrics(player_comparison_df, expert_names)
 
     metrics = {
-        "brier_score": float(brier_score),
-        "brier_score_unanimous": float(brier_score_unanimous),
         "ece": float(ece),
         "ece_unanimous": float(ece_unanimous),
         **concordance_metrics

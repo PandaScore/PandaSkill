@@ -225,12 +225,10 @@ def _compute_region_change_metrics(
     return region_change_metrics
 
 def _compute_metrics(y_test_list: list[int], y_prob_list: list[float]) -> dict:
-    brier_score = compute_brier_score(y_test_list, y_prob_list)
     accuracy = sum(np.array(np.array(y_prob_list) > 0.5) == np.array(y_test_list)) / len(y_test_list)
     ece = compute_ece(y_test_list, y_prob_list, 25)
 
     metrics = {
-        'brier_score': float(brier_score),
         'accuracy': float(accuracy),
         'ece': float(ece),
     }

@@ -1,9 +1,5 @@
 import numpy as np
 import pandas as pd
-from sklearn.metrics import brier_score_loss
-
-def compute_brier_score(y_true: np.ndarray, y_prob: np.ndarray) -> float:
-    return brier_score_loss(y_true, y_prob)
 
 def compute_ece(y_true: np.ndarray, y_prob: np.ndarray, nbins: int = 10, binning_method="equal-width") -> float:
     if binning_method == "equal-width":

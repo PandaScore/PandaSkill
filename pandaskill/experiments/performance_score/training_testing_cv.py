@@ -1,6 +1,6 @@
 from pandaskill.experiments.performance_score.visualization import *
 from pandaskill.experiments.general.utils import ROLES
-from pandaskill.experiments.general.metrics import compute_ece, compute_brier_score
+from pandaskill.experiments.general.metrics import compute_ece
 from pandaskill.experiments.general.visualization import *
 from pandaskill.libs.performance_score.base_model import BaseModel
 import logging
@@ -189,7 +189,6 @@ def _evaluate_game_perf_model(
         "f1": float(f1_score(y, y_prob > 0.5)),
         "auc": float(roc_auc_score(y, y_prob)),
         "ece": float(compute_ece(y, y_prob, nbins)),
-        "brier_score": float(compute_brier_score(y, y_prob))
     }
 
     return metrics 

@@ -56,6 +56,7 @@ def _get_player_ratings(data):
     selected_player_ids = [player_name_to_id[name] for name in selected_player_names]
     ratings = data.loc[data["player_id"].isin(selected_player_ids)].copy()
     ratings['entity_name'] = ratings['player_name']
+    
     return ratings
 
 def _get_team_ratings(data):
@@ -81,7 +82,10 @@ def _get_team_ratings(data):
         skill_rating_mu=("skill_rating_mu", "mean"),
         skill_rating_sigma=("skill_rating_sigma", lambda x: np.sqrt(np.mean(np.square(x)))),
     ).reset_index()
+
     ratings["skill_rating"] = compute_rating_lower_bound(ratings["skill_rating_mu"], ratings["skill_rating_sigma"])
+    
+    return ratings
 
 def _select_ratings_in_time_window(ratings):    
     start_date, end_date = _select_date_range(ratings)

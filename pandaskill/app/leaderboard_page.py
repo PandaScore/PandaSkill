@@ -14,6 +14,51 @@ def display_leaderboard_page(data):
 
     st.header("Leaderboard")
 
+    (
+        date, region, role, parameters, ranking_type, since, min_nb_games
+    ) = _get_leaderboard_parameters(data)
+
+    st.info(f"Leaderboard at date {date}, with at least {min_nb_games} games since {since}")
+
+    ranking = create_global_player_ranking(data, parameters)
+
+    average_pscore = data.groupby("player_id")["performance_score"].mean()
+    ranking["pscore"] = ranking["player_id"].map(average_pscore)
+
+    if region != "All" or role != "All":
+        if region != "All":
+            ranking = ranking.loc[ranking["region"] == region]
+        if role != "All":
+            ranking = ranking.loc[ranking["role"] == role]
+        ranking["rank"] = range(1, len(ranking) + 1)
+
+    
+    if ranking_type == "Team":
+        ranking = _create_team_ranking_from_player_ranking(ranking)
+    else:   
+        ranking = ranking.loc[:, ["rank", "player_name", "team_name", "role", "region", "nb_games", "last_game_date", "pscore", "skill_rating_mu", "skill_rating_sigma", "skill_rating"]]
+
+    ranking_formatted = ranking.rename(columns={
+        "rank": "Rank",
+        "player_name": "Player",
+        "team_name": "Team",
+        "role": "Role",
+        "region": "Region",
+        "nb_games": "Nb Games",
+        "last_game_date": "Last Game Date",
+        "pscore": "PScore",
+        "skill_rating_mu": "Skill Rating Mu",
+        "skill_rating_sigma": "Skill Rating Sigma",
+        "skill_rating": "Skill Rating (99.7% CI)"
+    })
+
+    ranking_formatted = ranking_formatted.set_index("Rank")
+    
+    st.dataframe(ranking_formatted, use_container_width=True)
+ 
+    _display_distributions(ranking)
+
+def _get_leaderboard_parameters(data):
     date_default = data["date"].max()
 
     setting_columns = st.columns(4)
@@ -37,60 +82,25 @@ def display_leaderboard_page(data):
     }
     data = data.loc[data["date"] <= dt.datetime.combine(date, dt.datetime.min.time())]
 
-    st.info(f"Leaderboard at date {date}, with at least {min_nb_games} games since {since}")
+    return date, region, role, parameters, ranking_type, since, min_nb_games
 
-    ranking = create_global_player_ranking(data, parameters)
+def _create_team_ranking_from_player_ranking(ranking):    
+    ranking = ranking.sort_values("skill_rating", ascending=False) # so that we select the top 5 players per team
+    ranking = ranking.groupby("team_name").agg(
+        region=("region", "first"),
+        nb_games=("nb_games", "mean"),
+        last_game_date=("last_game_date", "max"),
+        pscore=("pscore", "mean"),
+        skill_rating_mu=("skill_rating_mu", lambda x: np.mean(x[:5])),
+        skill_rating_sigma=("skill_rating_sigma", lambda x: np.sqrt(np.mean(np.square(x[:5])))),
+    ).reset_index()
+    ranking["skill_rating"] = compute_rating_lower_bound(ranking["skill_rating_mu"], ranking["skill_rating_sigma"])
+    ranking = ranking.sort_values("skill_rating", ascending=False)
+    ranking["rank"] = range(1, len(ranking) + 1)     
+    ranking = ranking.loc[:, ["rank", "team_name", "region", "nb_games", "last_game_date", "pscore", "skill_rating_mu", "skill_rating_sigma", "skill_rating"]]
+    return ranking
 
-    average_pscore = data.groupby("player_id")["performance_score"].mean()
-    ranking["pscore"] = ranking["player_id"].map(average_pscore)
-
-
-    if region != "All" or role != "All":
-        if region != "All":
-            ranking = ranking.loc[ranking["region"] == region]
-        if role != "All":
-            ranking = ranking.loc[ranking["role"] == role]
-        ranking["rank"] = range(1, len(ranking) + 1)
-
-    
-    if ranking_type == "Team":
-        ranking = ranking.sort_values("skill_rating", ascending=False) # so that we select the top 5 players per team
-        ranking = ranking.groupby("team_name").agg(
-            region=("region", "first"),
-            nb_games=("nb_games", "mean"),
-            last_game_date=("last_game_date", "max"),
-            pscore=("pscore", "mean"),
-            skill_rating_mu=("skill_rating_mu", lambda x: np.mean(x[:5])),
-            skill_rating_sigma=("skill_rating_sigma", lambda x: np.sqrt(np.mean(np.square(x[:5])))),
-        ).reset_index()
-        ranking["skill_rating"] = compute_rating_lower_bound(ranking["skill_rating_mu"], ranking["skill_rating_sigma"])
-        ranking = ranking.sort_values("skill_rating", ascending=False)
-        ranking["rank"] = range(1, len(ranking) + 1)     
-        ranking = ranking.loc[:, ["rank", "team_name", "region", "nb_games", "last_game_date", "pscore", "skill_rating_mu", "skill_rating_sigma", "skill_rating"]]
-    else:   
-        ranking = ranking.loc[:, ["rank", "player_name", "team_name", "role", "region", "nb_games", "last_game_date", "pscore", "skill_rating_mu", "skill_rating_sigma", "skill_rating"]]
-
-    ranking_formatted = ranking.rename(columns={
-        "rank": "Rank",
-        "player_name": "Player",
-        "team_name": "Team",
-        "role": "Role",
-        "region": "Region",
-        "nb_games": "Nb Games",
-        "last_game_date": "Last Game Date",
-        "pscore": "PScore",
-        "skill_rating_mu": "Skill Rating Mu",
-        "skill_rating_sigma": "Skill Rating Sigma",
-        "skill_rating": "Skill Rating (99.7% CI)"
-    })
-
-    ranking_formatted = ranking_formatted.set_index("Rank")
-    
-    st.dataframe(ranking_formatted, use_container_width=True)
- 
-    display_distributions(ranking)
-
-def display_distributions(ranking):
+def _display_distributions(ranking):
     st.header("Distributions")
     y_column = st.selectbox('Value', ["skill_rating", "pscore"])
     x_column_choices = ["region", "role"] if "role" in ranking.columns else ["region"]

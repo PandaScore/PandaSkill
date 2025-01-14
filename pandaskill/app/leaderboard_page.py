@@ -55,6 +55,8 @@ def display_leaderboard_page(data):
     ranking_formatted = ranking_formatted.set_index("Rank")
     
     st.dataframe(ranking_formatted, use_container_width=True)
+
+    st.info("Player skill ratings are modeled as Gaussian distribution with parameters mu and sigma. They are ranked using the lower bound of the 99.7% confidence interval of the skill rating. See [here](https://en.wikipedia.org/wiki/68%E2%80%9395%E2%80%9399.7_rule) for more information.")
  
     _display_distributions(ranking)
 

@@ -1,3 +1,11 @@
+# Table of Contents
+1. [Description](#description)
+2. [Installation](#installation)
+3. [Data](#data)
+    - [Raw Subfolder Details](#raw-subfolder-details)
+4. [Reproducing Results](#reproducing-results)
+5. [TODO](#todo)
+
 # Description
 
 This repository holds the source code and data of the paper "PandaSkill - Player Performance and Skill Rating in

@@ -29,14 +29,14 @@ def _drop_specific_games(stat_df: pd.DataFrame) -> Tuple[pd.DataFrame, list]:
     return stat_df, game_ids_to_drop
 
 def _drop_incomplete_games(stat_df: pd.DataFrame) -> Tuple[pd.DataFrame, dict]:
-    stat_df, nan_ropped_games = _drop_games_with_nans(stat_df)
+    stat_df, nan_dropped_games = _drop_games_with_nans(stat_df)
     stat_df, wrong_game_length_dropped_games = _drop_rows_with_wrong_value(stat_df, "game_length", 0)
     stat_df, wrong_gold_earned_dropped_games = _drop_rows_with_wrong_value(stat_df, "gold_earned", 0)
     stat_df, wrong_total_damage_dealt_to_champions_dropped_games = _drop_rows_with_wrong_value(stat_df, "total_damage_dealt_to_champions", 0)
     stat_df, wrong_total_damage_taken_dropped_games = _drop_rows_with_wrong_value(stat_df, "total_damage_taken", 0)
     stat_df, missing_rows_dropped_games = _drop_games_with_missing_rows(stat_df)
     dropped_games_summary = {
-        "nan_ropped_games": nan_ropped_games,
+        "nan_dropped_games": nan_dropped_games,
         "wrong_game_length_dropped_games": wrong_game_length_dropped_games,
         "wrong_gold_earned_dropped_games": wrong_gold_earned_dropped_games,
         "wrong_total_damage_dealt_to_champions_dropped_games": wrong_total_damage_dealt_to_champions_dropped_games,

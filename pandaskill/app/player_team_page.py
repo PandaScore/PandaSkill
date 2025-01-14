@@ -3,6 +3,7 @@ import datetime as dt
 import pandas as pd
 import altair as alt
 import numpy as np
+from pandaskill.app.misc import compute_rating_lower_bound
 
 def display_player_team_page(data):
     """
@@ -67,7 +68,7 @@ def display_player_team_page(data):
                 skill_rating_mu=("skill_rating_mu", "mean"),
                 skill_rating_sigma=("skill_rating_sigma", lambda x: np.sqrt(np.mean(np.square(x)))),
             ).reset_index()
-            ratings["skill_rating"] = ratings["skill_rating_mu"] - 3 * ratings["skill_rating_sigma"]
+            ratings["skill_rating"] = compute_rating_lower_bound(ratings["skill_rating_mu"], ratings["skill_rating_sigma"])
         else:
             st.warning("Invalid selection type.")
 
@@ -102,7 +103,7 @@ def select_date_range(skill_ratings):
     return start_date, end_date
 
 def display_player_evolution(skill_ratings, comparing_entities):
-    skill_ratings["skill_rating_997%"] = skill_ratings["skill_rating_mu"] + 3 * skill_ratings["skill_rating_sigma"]
+    skill_ratings["skill_rating_997%"] = compute_rating_lower_bound(skill_ratings["skill_rating_mu"], skill_ratings["skill_rating_sigma"])
     secondary_y_axis = "pscore"
 
     skill_ratings["pscore_mean"] = skill_ratings.groupby("series_name")["pscore"].transform("mean")

@@ -5,6 +5,7 @@ from pandaskill.experiments.skill_rating.ranking import create_global_player_ran
 from pandaskill.experiments.general.utils import ALL_REGIONS
 import matplotlib.pyplot as plt
 import seaborn as sns
+from pandaskill.app.misc import compute_rating_lower_bound
 
 def display_leaderboard_page(data):
     """
@@ -62,7 +63,7 @@ def display_leaderboard_page(data):
             skill_rating_mu=("skill_rating_mu", lambda x: np.mean(x[:5])),
             skill_rating_sigma=("skill_rating_sigma", lambda x: np.sqrt(np.mean(np.square(x[:5])))),
         ).reset_index()
-        ranking["skill_rating"] = ranking["skill_rating_mu"] - 3 * ranking["skill_rating_sigma"]
+        ranking["skill_rating"] = compute_rating_lower_bound(ranking["skill_rating_mu"], ranking["skill_rating_sigma"])
         ranking = ranking.sort_values("skill_rating", ascending=False)
         ranking["rank"] = range(1, len(ranking) + 1)     
         ranking = ranking.loc[:, ["rank", "team_name", "region", "nb_games", "last_game_date", "pscore", "skill_rating_mu", "skill_rating_sigma", "skill_rating"]]

@@ -6,7 +6,11 @@ from pandaskill.experiments.general.utils import ALL_REGIONS
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-def display_leaderboard_page(data):    
+def display_leaderboard_page(data):
+    """
+    Display player or team leaderboard with filters for region, role, and date.
+    """
+
     st.header("Leaderboard")
 
     date_default = data["date"].max()

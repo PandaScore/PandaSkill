@@ -5,6 +5,10 @@ import altair as alt
 import numpy as np
 
 def display_player_team_page(data):
+    """
+    Display skill rating evolution for a player or team. Provides the possibility to compare two players or teams.
+    """
+
     st.header("Player / Team Evolution")
 
     data = data.reset_index()

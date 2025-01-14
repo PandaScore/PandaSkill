@@ -2,6 +2,10 @@ import streamlit as st
 import pandas as pd
 
 def display_game_page(data):
+    """
+    Display player stats, including performance scores and rating updates for a given game.
+    """
+
     st.header("Game Analysis")
 
     game_id = _select_game_id(data)

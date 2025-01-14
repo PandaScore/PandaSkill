@@ -3,7 +3,11 @@ import streamlit as st
 import pandas as pd
 import altair as alt
 
-def display_region_page(data):
+def display_region_page(data):    
+    """
+    Display average skill rating evolution for a whole region. Provides the possibility to only show the top 10 players.
+    """
+
     st.header("Region Evolution Page")
 
     data["date"] = data["date"].astype(str)

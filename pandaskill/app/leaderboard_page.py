@@ -63,21 +63,22 @@ def display_leaderboard_page(data):
 def _get_leaderboard_parameters(data):
     date_default = data["date"].max()
 
-    setting_columns = st.columns(4)
+    setting_columns = st.columns(5)
     with setting_columns[0]:
         ranking_type = st.selectbox("Ranking type", ["Player", "Team"], 0)
     with setting_columns[1]:
         date = st.date_input("Date", date_default, key="leaderboard_date")
     with setting_columns[2]:
+        min_nb_games = st.number_input("Minimum number of games", 10, 1000, 10, 10)
+    with setting_columns[3]:
         all_regions_choice = ["All"] + ALL_REGIONS
         region = st.selectbox("Region", all_regions_choice, 0)
-    with setting_columns[3]:    
+    with setting_columns[4]:    
         all_roles_choice = ["All"] + data["role"].unique().tolist()
         role = st.selectbox("Role", all_roles_choice, 0)
 
     since = date - dt.timedelta(days=30*6)
     since = since.strftime("%Y-%m-%d")
-    min_nb_games = 10
     parameters = {
         "since": since,
         "min_nb_games": min_nb_games

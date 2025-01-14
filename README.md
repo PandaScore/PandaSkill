@@ -43,7 +43,7 @@ pandaskill/artifacts/data/
 
 - `game_metadata.csv`: metadata of the games
     - `game_id`: ID of the game
-    - `date`: date
+    - `date`: date in format YYYY-MM-DD HH:MM:SS.ssssss
     - `match_id`: ID of the match (e.g., a BO5 is a match of max 5 games)
     - `tournament_id`: ID of the tournament
     - `tournament_name`: name of the tournament (e.g., Playoffs)
@@ -52,7 +52,7 @@ pandaskill/artifacts/data/
     - `league_id`: ID of the league
     - `league_name`: name of the league (e.g., LCK)
 
-Note: every game can be included in a tree structure such that: `League > Serie > Tournament > Match > Game`.
+Note: every game can be included in a tree structure such that: `Game ⊆ Match ⊆ Tournament ⊆ Serie ⊆ League`.
 
 - `game_players_stats.csv`:
     - `game_id`: ID of the game
@@ -67,7 +67,7 @@ Note: every game can be included in a tree structure such that: `League > Serie 
     - `champion_name`: name of the Champion played by the player
     - `team_kills`: total number of champion kills of the player's team
     - `tower_kills`: total number of tower kills of the player's team
-    - `inhibitor_kills`: total number of inhibitor kills of the player's team
+    - `inhibitor_kills`: total number of inhibitor kills of the player's team (destroying an inhibitor that has respawned is counted as a kill)
     - `dragon_kills`: total number of Drake kills of the player's team
     - `herald_kills`: total number of Rift Herald kills of the player's team
     - `baron_kills`: total number of Baron Nashor kills of the player's team

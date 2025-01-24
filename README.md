@@ -116,7 +116,3 @@ To reproduce the results presented in the paper, follow these steps:
     - you can edit the configuration in the file itself, configurations used in the paper are provided
 
 Results are located in `pandaskill/artifacts/experiments/`. 
-
-# TODO 
-- provide arxiv link to paper
-- provide doi of software

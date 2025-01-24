@@ -8,8 +8,7 @@
 
 # Description
 
-This repository holds the source code and data of the paper "PandaSkill - Player Performance and Skill Rating in
-Esports: Application to League of Legends".
+This repository holds the source code and data of the paper [PandaSkill - Player Performance and Skill Rating in Esports: Application to League of Legends](https://arxiv.org/abs/2501.10049).
 
 Player performances and ratings can be visualized [here](https://pandaskill.streamlit.app/).
 

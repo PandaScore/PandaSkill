@@ -8,7 +8,7 @@ from pandaskill.app.game_page import display_game_page
 st.set_page_config(layout="wide", page_icon=":panda_face:", page_title="PandaSkill")
 st.title("PandaSkill")
 st.info(
-    "PandaSkill is an app showing pro League of Legend player performances and skill ratings, following the methodology described in the paper [PandaSkill - Player Performance and Skill Rating in Esports: Application to League of Legends](https://arxiv.org/abs/2109.15098) by [PandaScore](https://pandascore.co/)."
+    "PandaSkill is an app showing pro League of Legend player performances and skill ratings, following the methodology described in the paper [PandaSkill - Player Performance and Skill Rating in Esports: Application to League of Legends](https://arxiv.org/abs/2501.10049) by [PandaScore](https://pandascore.co/)."
 )   
 
 def run():

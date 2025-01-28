@@ -30,7 +30,6 @@ nvidia-nccl-cu12==2.23.4
 openskill==6.0.1
 packaging==24.1
 pandas==2.2.3
--e .
 pillow==10.0.0
 pluggy==1.5.0
 progressbar==2.5
@@ -69,3 +68,4 @@ urllib3==2.2.3
 watchdog==5.0.3
 wheel==0.44.0
 xgboost==2.1.2
+-e .

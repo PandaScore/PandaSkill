@@ -3,7 +3,7 @@ import datetime as dt
 import pandas as pd
 import altair as alt
 import numpy as np
-from pandaskill.app.misc import compute_rating_lower_bound
+from pandaskill.app.misc import compute_rating_lower_bound, compute_rating_upper_bound
 
 def display_player_team_page(data):
     """
@@ -117,6 +117,7 @@ def _select_date_range(skill_ratings):
 
 def _display_player_evolution(skill_ratings):
     skill_ratings["skill_rating_997%"] = compute_rating_lower_bound(skill_ratings["skill_rating_mu"], skill_ratings["skill_rating_sigma"])
+    skill_ratings["skill_rating_003%"] = compute_rating_upper_bound(skill_ratings["skill_rating_mu"], skill_ratings["skill_rating_sigma"])
     secondary_y_axis = "pscore"
 
     skill_ratings["pscore_mean"] = skill_ratings.groupby("series_name")["pscore"].transform("mean")
@@ -146,11 +147,11 @@ def _display_player_evolution(skill_ratings):
     if show_gaussian_ratings:
         rating_chart_area = base.mark_area().encode(
             x=alt.X('index:Q', axis=alt.Axis(title='Game number'), ),
-            y=alt.Y(f"skill_rating:Q", axis=alt.Axis(title='Skill Rating'), scale=alt.Scale(
-                domainMin=float(skill_ratings["skill_rating"].min()) -1,
-                domainMax=float(skill_ratings["skill_rating_997%"].max() + 1)
+            y=alt.Y(f"skill_rating_997%:Q", axis=alt.Axis(title='Skill Rating'), scale=alt.Scale(
+                domainMin=float(skill_ratings["skill_rating_997%"].min()) -1,
+                domainMax=float(skill_ratings["skill_rating_003%"].max() + 1)
             )),
-            y2=alt.Y2(f"skill_rating_997%:Q"),
+            y2=alt.Y2(f"skill_rating_003%:Q"),
             color="entity_name:N",
             opacity=alt.value(0.4),
         ).properties(

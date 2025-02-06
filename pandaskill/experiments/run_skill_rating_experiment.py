@@ -90,7 +90,8 @@ if __name__ == "__main__":
         },
         "ranking":{
             "min_nb_games": 10,
-            "since": "2024-03-15"
+            "since": "2024-03-15",
+            "date": "2024-09-15"
         }
     }
     logging.info(f"Starting skill rating experiment `{config['experiment']}`")

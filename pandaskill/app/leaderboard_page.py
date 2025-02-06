@@ -78,9 +78,9 @@ def _get_leaderboard_parameters(data):
         role = st.selectbox("Role", all_roles_choice, 0)
 
     since = date - dt.timedelta(days=30*6)
-    since = since.strftime("%Y-%m-%d")
     parameters = {
-        "since": since,
+        "since": since.strftime("%Y-%m-%d"),
+        "date": date.strftime("%Y-%m-%d"),
         "min_nb_games": min_nb_games
     }
     data = data.loc[data["date"] <= dt.datetime.combine(date, dt.datetime.min.time())]

@@ -36,7 +36,9 @@ def create_global_player_ranking(
     data_with_ratings: pd.DataFrame, 
     parameters: dict
 ) -> pd.DataFrame:
-    data_with_ratings = data_with_ratings[data_with_ratings.date > parameters["since"]]
+    data_with_ratings = data_with_ratings[
+        (data_with_ratings.date <= parameters["date"]) & (data_with_ratings.date > parameters["since"])
+    ]
 
     most_played_recent_league_by_player = data_with_ratings.groupby("player_id")["league_name"].agg(
         lambda x: x.mode()[0]

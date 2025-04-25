@@ -6,6 +6,7 @@ from pandaskill.experiments.general.utils import ALL_REGIONS
 import matplotlib.pyplot as plt
 import seaborn as sns
 from pandaskill.app.misc import compute_rating_lower_bound
+from datetime import timedelta
 
 def display_leaderboard_page(data):
     """
@@ -80,7 +81,7 @@ def _get_leaderboard_parameters(data):
     since = date - dt.timedelta(days=30*6)
     parameters = {
         "since": since.strftime("%Y-%m-%d"),
-        "date": date.strftime("%Y-%m-%d"),
+        "date": (date + timedelta(days=1)).strftime("%Y-%m-%d"),
         "min_nb_games": min_nb_games
     }
     data = data.loc[data["date"] <= dt.datetime.combine(date, dt.datetime.min.time())]

@@ -31,8 +31,8 @@ def visualize_performance_scores(
         "role",
         "performance_score",
         "Performance score distribution per role",
-        "Region",
-        "Player Performance in Game",
+        "Role",
+        "PScore",
         experiment_dir,
         "performance_score_per_role.png"
     )
@@ -89,7 +89,6 @@ def plot_all_models_calibration(
 
     plt.tight_layout()
 
-    # plt.savefig(join(saving_dir, "full_calibration_plots.png"))
     plt.savefig(join(saving_dir, "full_calibration_plots.pdf"))
     plt.close()
 
@@ -117,9 +116,10 @@ def plot_shap_game_features_impact(
     explainer: shap.Explainer,
     shap_values: np.ndarray,
     feature_values_df: pd.DataFrame,
-    title: str,
     file_name: str,
-    saving_folder: str
+    saving_folder: str,
+    nb_features_to_display: int = 5,
+    show_xlabel: bool = True
 ) -> None:
     os.makedirs(saving_folder, exist_ok=True)
     feature_values_df = feature_values_df.rename(index=feature_str_dict)
@@ -131,11 +131,12 @@ def plot_shap_game_features_impact(
     )
     shap.waterfall_plot(
         explanation,
-        max_display=10,
+        max_display=nb_features_to_display,
         show=False,
     )
     fig = plt.gcf()
-    fig.axes[0].set_xlabel("SHAP Values", labelpad=20, fontsize=14)  # Set xlabel for the last axis (waterfall plot)
+    if show_xlabel:
+        fig.axes[0].set_xlabel("SHAP Values", labelpad=20, fontsize=14)  # Set xlabel for the last axis (waterfall plot)
     fig.tight_layout()  
     plt.savefig(
         join(saving_folder, file_name[:-4] + ".pdf"),
@@ -151,9 +152,6 @@ def plot_multiple_shap_features_impact(
     saving_folder: str,
     max_display: int = 10
 ) -> None:
-    
-
-
     os.makedirs(saving_folder, exist_ok=True)
     
     fig, axes = plt.subplots(nrows=1, ncols=5, figsize=(12,6))

@@ -49,9 +49,12 @@ def compute_performance_scores_cv_loop(
         features_importance_list.append(feature_importances_fold)
         calibration_data.append(calibration_data_fold)
 
-    if evaluation_config["visualize_shap_values"]:
-        _visualize_shap_values(
-            data, features, test_game_ids, evaluation_config["specific_games_analysis"], models_list, roles, experiment_dir
+    _visualize_shap_values_single_game(
+        data, features, test_game_ids, evaluation_config["specific_games_analysis"], models_list, roles, experiment_dir
+    )
+    if evaluation_config["visualize_shap_values_distributions"]:
+        _visualize_shap_values_distributions(
+            data, features, test_game_ids, models_list, roles, experiment_dir
         )
 
     plot_all_models_calibration(calibration_data, experiment_dir)
@@ -63,7 +66,7 @@ def compute_performance_scores_cv_loop(
 
     return performance_scores_df, evaluation_metrics
 
-def _visualize_shap_values(
+def _visualize_shap_values_single_game(
     data: pd.DataFrame, 
     features: list, 
     game_ids_cv: np.ndarray, 
@@ -72,11 +75,52 @@ def _visualize_shap_values(
     roles: list,
     experiment_dir: str
 ) -> None:    
+    if not specific_game_ids:
+        return
+    
+    saving_folder = join(experiment_dir, "shap_values")
+    explainers_dict = {
+        role: [shap.Explainer(model_role_dict[role].model) for model_role_dict in models_cv]
+        for role in roles
+    }
+    for game_id in specific_game_ids:
+        fold_idx = next(i for i, g in enumerate(game_ids_cv) if game_id in g)
+        game_saving_folder = os.path.join(saving_folder, f"game_{game_id}")
+        os.makedirs(game_saving_folder, exist_ok=True)
+
+        X_game = data.xs(game_id, level="game_id")
+        for player_id, row in X_game.iterrows():
+            role = row["role"]
+            player_name = row["player_name"]
+
+            X  = row[features].values.reshape(1, -1)
+            model_obj = models_cv[fold_idx][role]
+            X_norm = model_obj.scaler.transform(X)
+
+            explainer = explainers_dict[role][fold_idx]
+            shap_vals = explainer(X_norm)
+
+            plot_shap_game_features_impact(
+                explainer=explainer,
+                shap_values=shap_vals.values[0],
+                feature_values_df= pd.Series(X[0], index=features, name=player_id),
+                file_name= f"{role}_{game_id}_{player_name}.png",
+                saving_folder=game_saving_folder,
+                nb_features_to_display=10,
+                show_xlabel=True
+            )
+
+def _visualize_shap_values_distributions(
+    data: pd.DataFrame, 
+    features: list, 
+    game_ids_cv: np.ndarray,
+    models_cv: dict, 
+    roles: list,
+    experiment_dir: str
+) -> None:    
     saving_folder = join(experiment_dir, "shap_values")
     shap_values_dict = {}
     feature_values_dict = {}
-    explainers_dict = {}
-    
     for role in roles:
         shap_values, feature_values, all_game_ids, explainers = [], [], [], []
         for game_ids, model_role_dict in zip(game_ids_cv, models_cv):
@@ -93,7 +137,6 @@ def _visualize_shap_values(
         shap_values_array = np.concatenate(shap_values, axis=0)
         shap_values_dict[role] = shap_values_array
         feature_values_dict[role] = feature_values_df
-        explainers_dict[role] = explainers
     
     file_name = "combined_shap_features_impact.png"
     plot_multiple_shap_features_impact(
@@ -104,38 +147,6 @@ def _visualize_shap_values(
         saving_folder=saving_folder,
         max_display=len(features)
     )
-
-    for role in roles:
-        shap_values_role = shap_values_dict[role]
-        shap_values = pd.DataFrame(shap_values_role, index=[game_id for game_id in all_game_ids for _ in range(2)], columns=features)
-        for game_id in specific_game_ids:
-            game_id_fold_index = next(
-                (fold_index for fold_index, game_ids in enumerate(game_ids_cv) if game_id in game_ids),
-                None
-            )
-                        
-            explainer_game = explainers_dict[role][game_id_fold_index]
-            
-            shap_values_game = shap_values.loc[game_id]
-            feature_values_game = feature_values_dict[role].loc[game_id]
-            
-            game_saving_folder = join(saving_folder, f"game_{game_id}")
-            os.makedirs(game_saving_folder, exist_ok=True)
-            
-            for player_index in range(len(shap_values_game)):
-                player_id = feature_values_game.iloc[player_index].name
-                player_name = data.loc[(game_id, player_id), "player_name"]
-                
-                file_name = f"{role}_shap_features_impact_{game_id}_{player_name}.png"
-                
-                plot_shap_game_features_impact(
-                    explainer=explainer_game,
-                    shap_values=shap_values_game.iloc[player_index].values, 
-                    feature_values_df=feature_values_game.iloc[player_index], 
-                    title=f"SHAP values for player {player_name} in game {game_id} with role {role}",
-                    file_name=file_name, 
-                    saving_folder=game_saving_folder
-                )
             
 def _compute_game_id_cross_validation(
     data: pd.DataFrame,

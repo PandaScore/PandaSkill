@@ -1,5 +1,5 @@
 from pandaskill.experiments.general.metrics import compute_ece_from_binned_df, bin_predictions_equal_size
-from pandaskill.experiments.general.utils import ALL_REGIONS
+from pandaskill.experiments.general.utils import ALL_REGIONS, ROLES
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -62,22 +62,23 @@ def plot_violin_distributions(
 
     df = df.copy()
     
-    if x_column == "region":
+    if x_column in ["role", "region"]:
+        reference_list = ALL_REGIONS if x_column == "region" else ROLES
         region_order_dict = {
             region: i
-            for i, region in enumerate(ALL_REGIONS)
+            for i, region in enumerate(reference_list)
         }
-        df["region_order"] = df["region"].map(region_order_dict)
+        df["order"] = df[x_column].map(region_order_dict)
+        df = df.sort_values("order")
 
-        format_region = lambda region: region.replace(" ", "\n").replace("-", "\n")
-        df["region"] = df["region"].apply(format_region)
+        if x_column == "region": # format region names
+            format_region = lambda region: region.replace(" ", "\n").replace("-", "\n")
+            df[x_column] = df[x_column].apply(format_region)
+            reference_list = [
+                format_region(region) for region in reference_list
+            ]
         
-        df = df.sort_values("region_order")
-        
-        all_regions_formatted = [
-            format_region(region) for region in ALL_REGIONS
-        ]
-        color_palette = dict(zip(all_regions_formatted, color_palette))
+        color_palette = dict(zip(reference_list, color_palette))        
     else:
         nb_unique_hue = len(df[x_column].unique())
         color_palette = color_palette[:nb_unique_hue]
@@ -104,5 +105,4 @@ def plot_violin_distributions(
     plt.tight_layout()
 
     plt.savefig(join(saving_dir, f"{file_name[:-4]}.pdf"))
-    # plt.savefig(join(saving_dir, file_name))
     plt.close()

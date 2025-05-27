@@ -71,7 +71,7 @@ if __name__ == "__main__":
             "one_model_per_role": True,
         },
         "visualization": {
-            "visualize_shap_values": False, # activating this will significantly slow down the computation
+            "visualize_shap_values_distributions": False, # activating this will significantly slow down the computation
             "specific_games_analysis": [
                 36348, # close game - LCK 2024
             ]
